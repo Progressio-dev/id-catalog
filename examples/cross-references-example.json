@@ -1,0 +1,210 @@
+{
+  "version": "1.0",
+  "description": "Example cross-reference configurations",
+  "reference_types": [
+    {
+      "value": "related",
+      "label": "Related Product",
+      "description": "Products that are commonly purchased together"
+    },
+    {
+      "value": "variant",
+      "label": "Product Variant",
+      "description": "Different sizes, colors, or configurations of the same product"
+    },
+    {
+      "value": "see_also",
+      "label": "See Also",
+      "description": "Similar or alternative products"
+    },
+    {
+      "value": "replaced_by",
+      "label": "Replaced By",
+      "description": "Product has been superseded by a newer model"
+    },
+    {
+      "value": "accessory",
+      "label": "Accessory",
+      "description": "Accessories or add-ons for the product"
+    },
+    {
+      "value": "compatible",
+      "label": "Compatible Item",
+      "description": "Products that work together"
+    },
+    {
+      "value": "series",
+      "label": "Product Series",
+      "description": "Part of the same product line or series"
+    }
+  ],
+  "examples": [
+    {
+      "name": "Camera and Accessories",
+      "references": [
+        {
+          "sourceId": "CAM-001",
+          "targetId": "LENS-001",
+          "type": "accessory",
+          "metadata": {
+            "description": "Compatible lens for Camera XYZ"
+          }
+        },
+        {
+          "sourceId": "CAM-001",
+          "targetId": "TRIPOD-001",
+          "type": "accessory",
+          "metadata": {
+            "description": "Recommended tripod"
+          }
+        },
+        {
+          "sourceId": "CAM-001",
+          "targetId": "BAG-001",
+          "type": "accessory",
+          "metadata": {
+            "description": "Camera bag"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Variants",
+      "references": [
+        {
+          "sourceId": "SHIRT-001-S",
+          "targetId": "SHIRT-001-M",
+          "type": "variant",
+          "metadata": {
+            "attribute": "size",
+            "value": "Medium"
+          }
+        },
+        {
+          "sourceId": "SHIRT-001-S",
+          "targetId": "SHIRT-001-L",
+          "type": "variant",
+          "metadata": {
+            "attribute": "size",
+            "value": "Large"
+          }
+        },
+        {
+          "sourceId": "SHIRT-001-S",
+          "targetId": "SHIRT-001-XL",
+          "type": "variant",
+          "metadata": {
+            "attribute": "size",
+            "value": "Extra Large"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Series",
+      "references": [
+        {
+          "sourceId": "PHONE-X-64GB",
+          "targetId": "PHONE-X-128GB",
+          "type": "series",
+          "metadata": {
+            "series": "Phone X Series",
+            "difference": "storage"
+          }
+        },
+        {
+          "sourceId": "PHONE-X-64GB",
+          "targetId": "PHONE-X-256GB",
+          "type": "series",
+          "metadata": {
+            "series": "Phone X Series",
+            "difference": "storage"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Replacement",
+      "references": [
+        {
+          "sourceId": "OLD-PRODUCT-123",
+          "targetId": "NEW-PRODUCT-456",
+          "type": "replaced_by",
+          "metadata": {
+            "replacement_date": "2024-01-01",
+            "reason": "Improved model with better features"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compatible Products",
+      "references": [
+        {
+          "sourceId": "PRINTER-001",
+          "targetId": "INK-001",
+          "type": "compatible",
+          "metadata": {
+            "compatibility": "Black ink cartridge"
+          }
+        },
+        {
+          "sourceId": "PRINTER-001",
+          "targetId": "INK-002",
+          "type": "compatible",
+          "metadata": {
+            "compatibility": "Color ink cartridge"
+          }
+        },
+        {
+          "sourceId": "PRINTER-001",
+          "targetId": "PAPER-001",
+          "type": "compatible",
+          "metadata": {
+            "compatibility": "Photo paper"
+          }
+        }
+      ]
+    }
+  ],
+  "import_format": {
+    "description": "Import references from a field in your data",
+    "csv_example": {
+      "headers": ["id", "name", "price", "related_products"],
+      "row": ["CAM-001", "Camera XYZ", "599.99", "LENS-001,TRIPOD-001,BAG-001"]
+    },
+    "note": "related_products field contains comma-separated IDs of related items"
+  },
+  "display_options": {
+    "list_format": {
+      "enabled": true,
+      "show_page_numbers": true,
+      "show_prices": false,
+      "max_items": 5
+    },
+    "box_format": {
+      "enabled": false,
+      "title": "Related Products",
+      "layout": "grid",
+      "columns": 2
+    }
+  },
+  "validation": {
+    "check_broken_links": true,
+    "auto_remove_broken": false,
+    "warn_on_circular": true,
+    "max_depth": 3
+  },
+  "statistics_example": {
+    "totalRecordsWithReferences": 25,
+    "totalReferences": 87,
+    "averageReferencesPerRecord": 3.48,
+    "referencesByType": {
+      "related": 35,
+      "variant": 20,
+      "accessory": 18,
+      "compatible": 10,
+      "see_also": 4
+    }
+  }
+}

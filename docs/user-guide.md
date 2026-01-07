@@ -215,6 +215,150 @@ After making changes to your data:
 
 The plugin will detect changes and update only the modified content.
 
+## Advanced Features
+
+### Using Formulas
+
+Create calculated fields with powerful formulas:
+
+1. Go to **Advanced** tab > **Formulas**
+2. Enter a field name for the calculated value
+3. Write your formula using:
+   - Field references: `{fieldName}`
+   - Operators: `+`, `-`, `*`, `/`, `%`
+   - Functions: `ROUND()`, `IF()`, `MIN()`, `MAX()`, etc.
+4. Click **Test Formula** to preview the result
+5. Click **Add Formula** to save
+
+**Example Formulas:**
+- Price with tax: `{price} * 1.20`
+- Discounted price: `{price} - ({price} * {discount} / 100)`
+- Bulk discount: `IF({quantity} > 100, {price} * 0.9, {price})`
+- Currency conversion: `ROUND({price} * {exchange_rate}, 2)`
+
+**Available Functions:**
+- `ROUND(value, decimals)` - Round to decimal places
+- `IF(condition, trueValue, falseValue)` - Conditional logic
+- `MIN(a, b)` / `MAX(a, b)` - Min/max values
+- `ABS(value)` - Absolute value
+- `CEIL(value)` / `FLOOR(value)` - Round up/down
+- `CONCAT(str1, str2)` - Concatenate strings
+
+### Filtering and Sorting
+
+Filter and sort your data before generating the catalog:
+
+1. Go to **Advanced** tab > **Filtering & Sorting**
+2. **Add Filters:**
+   - Select a field
+   - Choose an operator (equals, contains, greater than, etc.)
+   - Enter a value
+   - Click **Add Filter**
+3. **Add Sort Rules:**
+   - Select a field
+   - Choose direction (ascending/descending)
+   - Click **Add Sort**
+4. Click **Apply Filters** to see statistics
+
+**Filter Operators:**
+- `Equals` / `Not Equals` - Exact match
+- `Contains` / `Starts With` / `Ends With` - Text matching
+- `Greater Than` / `Less Than` - Numeric comparison
+- `Between` - Range filtering
+- `Is Empty` / `Is Not Empty` - Check for values
+
+**Combine Filters:**
+- Use **AND** logic - All filters must match
+- Use **OR** logic - Any filter can match
+
+**Save Presets:**
+- Click **Save Preset** to save filter configurations
+- Click **Load Preset** to reuse saved filters
+
+### Grouping Data
+
+Organize your catalog with hierarchical grouping:
+
+1. Go to **Advanced** tab > **Grouping**
+2. Select a field to group by
+3. Choose sort direction
+4. Click **Add Level** for multi-level grouping
+5. Configure group options:
+   - Show group headers
+   - Show item counts
+   - Page breaks per group
+   - Header style and separator
+6. Click **Apply Grouping**
+
+**Examples:**
+- Single-level: Group by category
+- Two-level: Group by category, then brand
+- Three-level: Group by department > category > brand
+
+**Group Options:**
+- Header styles: Heading 1, Heading 2, Heading 3, Bold
+- Separators: Line, Extra Space, Page Break, None
+- Page breaks: Start new page for each top-level group
+
+### Cross-References
+
+Link related products in your catalog:
+
+1. Go to **Advanced** tab > **Cross-References**
+2. Enter source product ID
+3. Enter target product ID
+4. Select reference type:
+   - Related Product
+   - Product Variant
+   - See Also
+   - Replaced By
+   - Accessory
+   - Compatible Item
+   - Product Series
+5. Click **Add Reference**
+
+**Import from Field:**
+- If your data has a field with related product IDs (comma-separated)
+- Click **Import from Field**
+- Enter the field name
+- References will be imported automatically
+
+**Validate References:**
+- Click **Validate References** to check for broken links
+- Fix any missing product IDs
+
+### Localization (Multi-Language)
+
+Create catalogs in multiple languages:
+
+1. Go to **Advanced** tab > **Localization**
+2. **Enable Languages:**
+   - Check boxes for languages you want to support
+3. **Field Mapping:**
+   - Click **Auto-Detect Language Fields**
+   - Or manually map fields (e.g., `productName` → `productName_fr`)
+4. **Select Catalog Language:**
+   - Choose the language for generation
+5. Click **Apply Language**
+
+**Data Structure:**
+- Use field naming: `fieldName_languageCode`
+- Example: `productName_en`, `productName_fr`, `productName_de`
+
+**Supported Languages:**
+- English (en), French (fr), German (de), Spanish (es)
+- Italian (it), Portuguese (pt), Dutch (nl), Polish (pl)
+- Russian (ru), Japanese (ja), Chinese (zh)
+- Arabic (ar), Hebrew (he)
+
+**Fallback:**
+- Enable "Use fallback" to show English when translation is missing
+- Helps ensure complete catalogs even with partial translations
+
+**Generate All Languages:**
+- Click **Generate All Languages** to create separate catalogs
+- One catalog per enabled language
+
 ## Tips and Best Practices
 
 ### Performance

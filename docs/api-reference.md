@@ -664,3 +664,451 @@ try {
 - `'fit'` - Fit to frame
 - `'fill'` - Fill frame
 - `'center'` - Center in frame
+
+---
+
+## Advanced Features APIs
+
+## FormulaEngine
+
+### Constructor
+
+```javascript
+const formulaEngine = new FormulaEngine();
+```
+
+### Methods
+
+#### `addFormula(name, expression)`
+
+Adds a new formula.
+
+**Parameters:**
+- `name` (string): Field name for calculated value
+- `expression` (string): Formula expression
+
+**Returns:** Formula object
+
+**Example:**
+```javascript
+formulaEngine.addFormula('price_with_tax', '{price} * 1.20');
+```
+
+#### `evaluate(expression, record)`
+
+Evaluates a formula for a record.
+
+**Parameters:**
+- `expression` (string): Formula to evaluate
+- `record` (Object): Data record with field values
+
+**Returns:** Calculated value
+
+**Example:**
+```javascript
+const result = formulaEngine.evaluate('{price} * 1.20', { price: 100 });
+// Returns: 120
+```
+
+#### `applyFormulas(records, formulas)`
+
+Applies all formulas to a dataset.
+
+**Parameters:**
+- `records` (Array): Data records
+- `formulas` (Array): Optional array of formulas (uses all if not provided)
+
+**Returns:** Array of enriched records
+
+**Example:**
+```javascript
+const enriched = formulaEngine.applyFormulas(records);
+```
+
+### Formula Syntax
+
+**Field References:**
+```javascript
+{fieldName}  // References a field value
+```
+
+**Operators:**
+- Arithmetic: `+`, `-`, `*`, `/`, `%`
+- Comparison: `<`, `>`, `<=`, `>=`, `==`, `!=`
+- Logical: `&&`, `||`
+
+**Functions:**
+- `ROUND(value, decimals)` - Round to decimal places
+- `CEIL(value)` - Round up
+- `FLOOR(value)` - Round down
+- `ABS(value)` - Absolute value
+- `MIN(a, b, ...)` - Minimum value
+- `MAX(a, b, ...)` - Maximum value
+- `IF(condition, trueValue, falseValue)` - Conditional
+- `CONCAT(str1, str2, ...)` - Concatenate strings
+
+---
+
+## FilterEngine
+
+### Constructor
+
+```javascript
+const filterEngine = new FilterEngine();
+```
+
+### Methods
+
+#### `addFilter(filter)`
+
+Adds a filter condition.
+
+**Parameters:**
+- `filter` (Object): Filter configuration
+  - `field` (string): Field name
+  - `operator` (string): Filter operator
+  - `value` (any): Comparison value
+  - `min` / `max` (any): For 'between' operator
+
+**Example:**
+```javascript
+filterEngine.addFilter({
+  field: 'price',
+  operator: 'greaterThan',
+  value: 100
+});
+```
+
+#### `addSortRule(field, direction, type)`
+
+Adds a sort rule.
+
+**Parameters:**
+- `field` (string): Field to sort by
+- `direction` (string): 'asc' or 'desc'
+- `type` (string): 'auto', 'string', 'number', or 'date'
+
+**Example:**
+```javascript
+filterEngine.addSortRule('price', 'desc', 'number');
+```
+
+#### `applyFilters(records, logic)`
+
+Applies filters to dataset.
+
+**Parameters:**
+- `records` (Array): Data records
+- `logic` (string): 'AND' or 'OR'
+
+**Returns:** Filtered array
+
+#### `applySort(records)`
+
+Applies sort rules to dataset.
+
+**Parameters:**
+- `records` (Array): Data records
+
+**Returns:** Sorted array
+
+#### `apply(records, logic)`
+
+Applies both filters and sorting.
+
+**Parameters:**
+- `records` (Array): Data records
+- `logic` (string): Filter logic - 'AND' or 'OR'
+
+**Returns:** Filtered and sorted array
+
+### Filter Operators
+
+- `equals` / `notEquals`
+- `contains` / `notContains`
+- `startsWith` / `endsWith`
+- `greaterThan` / `lessThan`
+- `greaterOrEqual` / `lessOrEqual`
+- `between`
+- `isEmpty` / `isNotEmpty`
+- `isTrue` / `isFalse`
+- `regex`
+
+---
+
+## GroupingEngine
+
+### Constructor
+
+```javascript
+const groupingEngine = new GroupingEngine();
+```
+
+### Methods
+
+#### `addGroupLevel(field, sortDirection)`
+
+Adds a grouping level.
+
+**Parameters:**
+- `field` (string): Field to group by
+- `sortDirection` (string): 'asc' or 'desc'
+
+**Example:**
+```javascript
+groupingEngine.addGroupLevel('category', 'asc');
+groupingEngine.addGroupLevel('brand', 'asc');
+```
+
+#### `setOptions(options)`
+
+Sets grouping options.
+
+**Parameters:**
+- `options` (Object): Configuration
+  - `showHeaders` (boolean)
+  - `showFooters` (boolean)
+  - `showItemCount` (boolean)
+  - `pageBreakPerGroup` (boolean)
+  - `headerStyle` (string)
+  - `separatorType` (string)
+
+**Example:**
+```javascript
+groupingEngine.setOptions({
+  showHeaders: true,
+  showItemCount: true,
+  pageBreakPerGroup: true
+});
+```
+
+#### `groupRecords(records)`
+
+Groups records by configured levels.
+
+**Parameters:**
+- `records` (Array): Data records
+
+**Returns:** Object with `groups` and `flatList`
+
+**Example:**
+```javascript
+const { groups, flatList } = groupingEngine.groupRecords(records);
+```
+
+---
+
+## CrossReferenceEngine
+
+### Constructor
+
+```javascript
+const crossRefEngine = new CrossReferenceEngine();
+```
+
+### Methods
+
+#### `addReference(sourceId, targetId, type, metadata)`
+
+Adds a cross-reference.
+
+**Parameters:**
+- `sourceId` (string): Source record ID
+- `targetId` (string): Target record ID
+- `type` (string): Reference type
+- `metadata` (Object): Optional metadata
+
+**Example:**
+```javascript
+crossRefEngine.addReference('CAM-001', 'LENS-001', 'accessory');
+```
+
+#### `getReferences(recordId, type)`
+
+Gets all references from a record.
+
+**Parameters:**
+- `recordId` (string): Record ID
+- `type` (string): Optional filter by type
+
+**Returns:** Array of references
+
+#### `validateReferences(records, idField)`
+
+Validates references against dataset.
+
+**Parameters:**
+- `records` (Array): Data records
+- `idField` (string): Name of ID field (default: 'id')
+
+**Returns:** Array of broken references
+
+**Example:**
+```javascript
+const broken = crossRefEngine.validateReferences(records, 'id');
+```
+
+### Reference Types
+
+- `related` - Related products
+- `variant` - Product variants
+- `see_also` - See also references
+- `replaced_by` - Superseded by
+- `accessory` - Accessories
+- `compatible` - Compatible items
+- `series` - Product series
+
+---
+
+## LocalizationEngine
+
+### Constructor
+
+```javascript
+const localizationEngine = new LocalizationEngine();
+```
+
+### Methods
+
+#### `setLanguage(languageCode)`
+
+Sets the current language.
+
+**Parameters:**
+- `languageCode` (string): Language code (e.g., 'en', 'fr', 'de')
+
+**Example:**
+```javascript
+localizationEngine.setLanguage('fr');
+```
+
+#### `addFieldMapping(baseField, languageFields)`
+
+Adds field mapping for localization.
+
+**Parameters:**
+- `baseField` (string): Base field name
+- `languageFields` (Object): Language-specific fields
+
+**Example:**
+```javascript
+localizationEngine.addFieldMapping('productName', {
+  en: 'productName_en',
+  fr: 'productName_fr',
+  de: 'productName_de'
+});
+```
+
+#### `localizeRecord(record, languageCode)`
+
+Localizes a single record.
+
+**Parameters:**
+- `record` (Object): Data record
+- `languageCode` (string): Target language (optional)
+
+**Returns:** Localized record
+
+#### `localizeDataset(records, languageCode)`
+
+Localizes entire dataset.
+
+**Parameters:**
+- `records` (Array): Data records
+- `languageCode` (string): Target language (optional)
+
+**Returns:** Array of localized records
+
+#### `autoDetectFieldMappings(records)`
+
+Auto-detects language field mappings.
+
+**Parameters:**
+- `records` (Array): Sample records
+
+**Returns:** Map of detected mappings
+
+#### `formatCurrency(amount, currency, languageCode)`
+
+Formats currency with locale.
+
+**Parameters:**
+- `amount` (number): Amount
+- `currency` (string): Currency code (e.g., 'USD', 'EUR')
+- `languageCode` (string): Language code (optional)
+
+**Returns:** Formatted string
+
+### Supported Languages
+
+- English (`en`)
+- French (`fr`)
+- German (`de`)
+- Spanish (`es`)
+- Italian (`it`)
+- Portuguese (`pt`)
+- Dutch (`nl`)
+- Polish (`pl`)
+- Russian (`ru`)
+- Japanese (`ja`)
+- Chinese (`zh`)
+- Arabic (`ar`)
+- Hebrew (`he`)
+
+---
+
+## Data Structures
+
+### Formula Object
+
+```javascript
+{
+  name: 'price_with_tax',
+  expression: '{price} * 1.20',
+  createdAt: '2024-01-01T00:00:00.000Z'
+}
+```
+
+### Filter Object
+
+```javascript
+{
+  field: 'price',
+  operator: 'greaterThan',
+  value: 100
+}
+```
+
+### Sort Rule Object
+
+```javascript
+{
+  field: 'price',
+  direction: 'desc',
+  type: 'number'
+}
+```
+
+### Group Object
+
+```javascript
+{
+  level: 0,
+  field: 'category',
+  value: 'Electronics',
+  records: [...],
+  subgroups: [...]
+}
+```
+
+### Cross-Reference Object
+
+```javascript
+{
+  sourceId: 'CAM-001',
+  targetId: 'LENS-001',
+  type: 'accessory',
+  metadata: {},
+  createdAt: '2024-01-01T00:00:00.000Z'
+}
+```

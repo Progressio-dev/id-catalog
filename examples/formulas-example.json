@@ -1,0 +1,108 @@
+{
+  "version": "1.0",
+  "description": "Example formulas for catalog calculations",
+  "formulas": [
+    {
+      "name": "price_with_tax",
+      "expression": "{price} * 1.20",
+      "description": "Calculate price with 20% tax"
+    },
+    {
+      "name": "price_with_vat",
+      "expression": "{price} * (1 + {tax_rate} / 100)",
+      "description": "Calculate price with variable VAT rate"
+    },
+    {
+      "name": "discounted_price",
+      "expression": "{price} - ({price} * {discount} / 100)",
+      "description": "Apply percentage discount to price"
+    },
+    {
+      "name": "total_price",
+      "expression": "{price} * {quantity}",
+      "description": "Calculate total price for quantity"
+    },
+    {
+      "name": "bulk_discount_price",
+      "expression": "IF({quantity} > 100, {price} * 0.9, IF({quantity} > 50, {price} * 0.95, {price}))",
+      "description": "Apply bulk discounts: 10% off for 100+, 5% off for 50+"
+    },
+    {
+      "name": "profit_margin",
+      "expression": "ROUND(({price} - {cost}) / {price} * 100, 2)",
+      "description": "Calculate profit margin percentage"
+    },
+    {
+      "name": "price_in_euros",
+      "expression": "ROUND({price} * {exchange_rate}, 2)",
+      "description": "Convert price to euros using exchange rate"
+    },
+    {
+      "name": "unit_price",
+      "expression": "ROUND({price} / {pack_size}, 2)",
+      "description": "Calculate price per unit"
+    },
+    {
+      "name": "final_price",
+      "expression": "ROUND({price} * (1 + {tax_rate} / 100) - {discount_amount}, 2)",
+      "description": "Price with tax minus fixed discount amount"
+    },
+    {
+      "name": "product_code",
+      "expression": "CONCAT({category}, '-', {sku})",
+      "description": "Generate product code from category and SKU"
+    },
+    {
+      "name": "price_tier",
+      "expression": "IF({price} > 1000, 'Premium', IF({price} > 500, 'Standard', 'Budget'))",
+      "description": "Categorize products by price tier"
+    },
+    {
+      "name": "min_order_value",
+      "expression": "MAX({price} * 5, 50)",
+      "description": "Minimum order value (5 units or $50, whichever is higher)"
+    }
+  ],
+  "examples": {
+    "sample_data": {
+      "price": 100,
+      "tax_rate": 20,
+      "discount": 10,
+      "quantity": 5,
+      "cost": 60,
+      "exchange_rate": 0.85,
+      "pack_size": 10,
+      "discount_amount": 5,
+      "category": "ELEC",
+      "sku": "001"
+    },
+    "expected_results": {
+      "price_with_tax": 120,
+      "price_with_vat": 120,
+      "discounted_price": 90,
+      "total_price": 500,
+      "bulk_discount_price": 100,
+      "profit_margin": 40,
+      "price_in_euros": 85,
+      "unit_price": 10,
+      "final_price": 115,
+      "product_code": "ELEC-001",
+      "price_tier": "Budget",
+      "min_order_value": 500
+    }
+  },
+  "formula_syntax": {
+    "field_references": "Use {fieldName} to reference data fields",
+    "operators": "+ - * / % for arithmetic, < > <= >= == != for comparison",
+    "functions": {
+      "ROUND(value, decimals)": "Round to specified decimal places",
+      "CEIL(value)": "Round up to nearest integer",
+      "FLOOR(value)": "Round down to nearest integer",
+      "ABS(value)": "Absolute value",
+      "MIN(a, b, ...)": "Minimum value",
+      "MAX(a, b, ...)": "Maximum value",
+      "IF(condition, trueValue, falseValue)": "Conditional logic",
+      "CONCAT(str1, str2, ...)": "Concatenate strings"
+    }
+  }
+}
