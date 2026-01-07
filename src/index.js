@@ -189,13 +189,17 @@ async function initialize() {
             errorDisplay.appendChild(heading);
             
             const errorPara = document.createElement('p');
-            errorPara.innerHTML = '<strong>Error:</strong> ';
+            const errorLabel = document.createElement('strong');
+            errorLabel.textContent = 'Error: ';
+            errorPara.appendChild(errorLabel);
             const errorText = document.createTextNode(error.message);
             errorPara.appendChild(errorText);
             errorDisplay.appendChild(errorPara);
             
             const stackPara = document.createElement('p');
-            stackPara.innerHTML = '<strong>Stack:</strong> ';
+            const stackLabel = document.createElement('strong');
+            stackLabel.textContent = 'Stack:';
+            stackPara.appendChild(stackLabel);
             errorDisplay.appendChild(stackPara);
             
             const stackDetail = document.createElement('div');
