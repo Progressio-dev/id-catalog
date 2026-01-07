@@ -50,50 +50,181 @@ let crossRefEngine;
 let localizationEngine;
 let logger;
 
+// Fallback: Check if modules loaded
+let modulesLoaded = false;
+
+// Test if imports worked - using timeout to ensure imports have completed
+// UXP may need a brief delay for module resolution
+const MODULE_LOAD_CHECK_DELAY = 100; // milliseconds
+
+setTimeout(() => {
+    if (typeof DataImporter === 'undefined') {
+        console.error('ES6 MODULES FAILED TO LOAD!');
+        console.error('DataImporter is undefined');
+        
+        // Show error to user - append to body instead of replacing
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-panel';
+        
+        const heading = document.createElement('h1');
+        heading.textContent = 'Module Loading Error';
+        errorDiv.appendChild(heading);
+        
+        const p1 = document.createElement('p');
+        p1.textContent = 'ES6 modules failed to load. This may be a compatibility issue with InDesign 2026.';
+        errorDiv.appendChild(p1);
+        
+        const p2 = document.createElement('p');
+        p2.textContent = 'Please check the UXP Developer Tool logs.';
+        errorDiv.appendChild(p2);
+        
+        const p3 = document.createElement('p');
+        p3.textContent = 'Try reloading the plugin or restarting InDesign.';
+        errorDiv.appendChild(p3);
+        
+        document.body.appendChild(errorDiv);
+        modulesLoaded = false;
+    } else {
+        console.log('ES6 modules loaded successfully');
+        modulesLoaded = true;
+    }
+}, MODULE_LOAD_CHECK_DELAY);
+
 /**
  * Initialize the plugin
  */
 async function initialize() {
     try {
+        console.log('=== CATALOG BUILDER INITIALIZATION START ===');
+        
+        // Create a visible error panel if initialization fails
+        const errorDisplay = document.createElement('div');
+        errorDisplay.id = 'init-error';
+        errorDisplay.className = 'init-error';
+        document.body.appendChild(errorDisplay);
+        
         logger = new Logger('CatalogBuilder');
         logger.info('Initializing Catalog Builder Plugin...');
+        console.log('Logger initialized');
 
-        // Initialize modules
+        // Initialize modules with detailed logging
+        console.log('Initializing DataImporter...');
         dataImporter = new DataImporter();
+        
+        console.log('Initializing DataMapper...');
         dataMapper = new DataMapper();
+        
+        console.log('Initializing PageGenerator...');
         pageGenerator = new PageGenerator();
+        
+        console.log('Initializing TemplateManager...');
         templateManager = new TemplateManager();
+        
+        console.log('Initializing ImageManager...');
         imageManager = new ImageManager();
+        
+        console.log('Initializing UpdateEngine...');
         updateEngine = new UpdateEngine();
         
         // Initialize advanced feature modules
+        console.log('Initializing FormulaEngine...');
         formulaEngine = new FormulaEngine();
+        
+        console.log('Initializing FilterEngine...');
         filterEngine = new FilterEngine();
+        
+        console.log('Initializing GroupingEngine...');
         groupingEngine = new GroupingEngine();
+        
+        console.log('Initializing CrossReferenceEngine...');
         crossRefEngine = new CrossReferenceEngine();
+        
+        console.log('Initializing LocalizationEngine...');
         localizationEngine = new LocalizationEngine();
 
         // Load settings
+        console.log('Loading settings...');
         await loadSettings();
         
         // Load saved configurations for advanced features
+        console.log('Loading formulas...');
         formulaEngine.loadFormulas();
+        
+        console.log('Loading filter presets...');
         filterEngine.loadPresetsFromStorage();
+        
+        console.log('Loading grouping configuration...');
         groupingEngine.loadConfiguration();
+        
+        console.log('Loading cross-references...');
         crossRefEngine.load();
+        
+        console.log('Loading localization configuration...');
         localizationEngine.loadConfiguration();
 
         // Setup UI event handlers
+        console.log('Setting up event handlers...');
         setupEventHandlers();
 
         // Setup tab navigation
+        console.log('Setting up tabs...');
         setupTabs();
 
+        console.log('=== PLUGIN INITIALIZED SUCCESSFULLY ===');
         logger.info('Plugin initialized successfully');
         showStatus('Ready');
     } catch (error) {
-        logger.error('Failed to initialize plugin:', error);
-        showError('Failed to initialize plugin: ' + error.message);
+        console.error('=== PLUGIN INITIALIZATION FAILED ===');
+        console.error('Error details:', error);
+        console.error('Error stack:', error.stack);
+        
+        // Show visible error to user
+        const errorDisplay = document.getElementById('init-error');
+        if (errorDisplay) {
+            errorDisplay.style.display = 'block';
+            
+            // Safely create error display without innerHTML
+            const heading = document.createElement('h2');
+            heading.textContent = 'Plugin Initialization Failed';
+            errorDisplay.appendChild(heading);
+            
+            const errorPara = document.createElement('p');
+            const errorLabel = document.createElement('strong');
+            errorLabel.textContent = 'Error: ';
+            errorPara.appendChild(errorLabel);
+            const errorText = document.createTextNode(error.message);
+            errorPara.appendChild(errorText);
+            errorDisplay.appendChild(errorPara);
+            
+            const stackPara = document.createElement('p');
+            const stackLabel = document.createElement('strong');
+            stackLabel.textContent = 'Stack:';
+            stackPara.appendChild(stackLabel);
+            errorDisplay.appendChild(stackPara);
+            
+            const stackDetail = document.createElement('div');
+            stackDetail.className = 'error-detail';
+            stackDetail.textContent = error.stack || 'No stack trace available';
+            errorDisplay.appendChild(stackDetail);
+            
+            const logsPara = document.createElement('p');
+            logsPara.textContent = 'Check UXP Developer Tool logs for more details.';
+            errorDisplay.appendChild(logsPara);
+        }
+        
+        // Also show in UI if possible
+        const statusMessage = document.getElementById('statusMessage');
+        if (statusMessage) {
+            statusMessage.textContent = '❌ Initialization failed: ' + error.message;
+            statusMessage.style.color = '#f44336';
+        }
+        
+        if (logger) {
+            logger.error('Failed to initialize plugin:', error);
+        }
+        
+        // Re-throw to ensure it appears in console
+        throw error;
     }
 }
 
