@@ -465,6 +465,252 @@ See `api-reference.md` for detailed API documentation.
 - Handle loading states
 - Show progress for long operations
 
+## Advanced Features Architecture
+
+### Formula Engine
+
+The Formula Engine provides a safe, powerful calculation system:
+
+**Architecture:**
+- Expression parser with field reference support
+- Safe evaluation using limited scope
+- Built-in function library (ROUND, IF, MIN, MAX, etc.)
+- Validation and error handling
+
+**Implementation:**
+```javascript
+// Field references are replaced with actual values
+{price} * 1.20 → 100 * 1.20 → 120
+
+// Functions are processed before evaluation
+ROUND({price} * 1.20, 2) → ROUND(120, 2) → 120.00
+
+// Conditional logic is supported
+IF({quantity} > 100, {price} * 0.9, {price})
+→ IF(150 > 100, 100 * 0.9, 100)
+→ 90
+```
+
+**Security:**
+- Uses Function constructor with limited scope
+- Validates expressions before execution
+- Prevents injection attacks
+- Error boundaries for failed calculations
+
+### Filter Engine
+
+Multi-condition filtering with flexible operators:
+
+**Architecture:**
+- Filter condition chain
+- Multiple sort levels
+- Preset save/load
+- Statistics tracking
+
+**Implementation:**
+```javascript
+// Filters are applied sequentially
+const filtered = records.filter(record => {
+  if (logic === 'AND') {
+    return filters.every(f => matchesFilter(record, f));
+  } else {
+    return filters.some(f => matchesFilter(record, f));
+  }
+});
+
+// Sorting uses multi-level comparison
+sorted.sort((a, b) => {
+  for (const rule of sortRules) {
+    const result = compare(a[rule.field], b[rule.field]);
+    if (result !== 0) return result;
+  }
+  return 0;
+});
+```
+
+**Operators:**
+- String: equals, contains, startsWith, endsWith
+- Numeric: greaterThan, lessThan, between
+- Boolean: isTrue, isFalse, isEmpty
+- Advanced: regex patterns
+
+### Grouping Engine
+
+Hierarchical data grouping system:
+
+**Architecture:**
+- Multi-level group hierarchy
+- Recursive group building
+- Flat list generation for layout
+- Group aggregations (sum, count, avg, etc.)
+
+**Data Structure:**
+```javascript
+{
+  groups: [
+    {
+      level: 0,
+      field: 'category',
+      value: 'Electronics',
+      subgroups: [
+        {
+          level: 1,
+          field: 'brand',
+          value: 'Sony',
+          records: [...]
+        }
+      ]
+    }
+  ],
+  flatList: [
+    { type: 'group-header', level: 0, value: 'Electronics' },
+    { type: 'group-header', level: 1, value: 'Sony' },
+    { type: 'record', data: {...} },
+    { type: 'group-footer', level: 1 },
+    { type: 'group-footer', level: 0 }
+  ]
+}
+```
+
+**Implementation:**
+- Records are sorted by group fields
+- Groups are built recursively
+- Flat list enables sequential page generation
+- Aggregations calculated per group
+
+### Cross-Reference Engine
+
+Bidirectional reference tracking:
+
+**Architecture:**
+- Forward index: sourceId → references
+- Reverse index: targetId → referencing sources
+- Reference type taxonomy
+- Validation and broken link detection
+
+**Data Structure:**
+```javascript
+// Forward index
+references = Map {
+  'CAM-001' => [
+    { targetId: 'LENS-001', type: 'accessory' },
+    { targetId: 'TRIPOD-001', type: 'accessory' }
+  ]
+}
+
+// Reverse index
+reverseIndex = Map {
+  'LENS-001' => [
+    { sourceId: 'CAM-001', type: 'accessory' }
+  ]
+}
+```
+
+**Features:**
+- Bidirectional lookups (O(1) time)
+- Bulk import from data fields
+- Reference validation
+- Statistics and analytics
+
+### Localization Engine
+
+Multi-language catalog support:
+
+**Architecture:**
+- Field mapping system (base → language-specific)
+- Automatic field detection
+- Fallback mechanism
+- Locale-aware formatting
+
+**Field Mapping:**
+```javascript
+fieldMappings = Map {
+  'productName' => {
+    en: 'productName_en',
+    fr: 'productName_fr',
+    de: 'productName_de'
+  },
+  'description' => {
+    en: 'description_en',
+    fr: 'description_fr',
+    de: 'description_de'
+  }
+}
+```
+
+**Localization Process:**
+1. Detect language fields (pattern: `field_langCode`)
+2. Create field mappings
+3. Select target language
+4. Map fields to language-specific versions
+5. Apply fallback for missing translations
+6. Format numbers/dates/currency per locale
+
+**Features:**
+- Auto-detection of language fields
+- 13 supported languages
+- RTL language support (Arabic, Hebrew)
+- Locale-aware number/date formatting
+- Translation status tracking
+
+## Integration Pattern
+
+Advanced features integrate with the main workflow:
+
+```javascript
+// 1. Import data
+const data = await dataImporter.importData(file, options);
+
+// 2. Apply formulas
+const withFormulas = formulaEngine.applyFormulas(data.records);
+
+// 3. Apply localization
+const localized = localizationEngine.localizeDataset(withFormulas);
+
+// 4. Apply filters
+const filtered = filterEngine.apply(localized, 'AND');
+
+// 5. Apply grouping
+const grouped = groupingEngine.groupRecords(filtered);
+
+// 6. Generate with cross-references
+await pageGenerator.generate({
+  data: grouped.flatList,
+  crossRefs: crossRefEngine,
+  ...options
+});
+```
+
+## Storage and Persistence
+
+Advanced features use localStorage:
+
+**Saved Data:**
+- Formulas: `catalogBuilderFormulas`
+- Filter presets: `catalogBuilderFilterPresets`
+- Grouping config: `catalogBuilderGrouping`
+- Cross-references: `catalogBuilderReferences`
+- Localization settings: `catalogBuilderLocalization`
+
+**Export/Import:**
+- All modules support JSON export
+- Configurations can be shared
+- Version tagging for compatibility
+
+## Performance Considerations
+
+**Large Datasets:**
+- Formulas: Cached evaluation results
+- Filters: Early termination for OR logic
+- Grouping: Optimized sorting algorithm
+- References: O(1) lookups with Map structures
+- Localization: Field mapping cache
+
+**Memory Management:**
+- Lazy evaluation where possible
+- Streaming for large operations
+- Garbage collection friendly patterns
+
 ## Contributing
 
 To contribute to the plugin:
