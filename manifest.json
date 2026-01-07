@@ -2,17 +2,17 @@
   "id": "com.progressio.idcatalog",
   "name": "ID Catalog Builder",
   "version": "1.0.0",
-  "host": [
-    {
-      "app": "ID",
-      "minVersion": "18.0"
-    }
-  ],
+  "main": "src/index.html",
+  "host": {
+    "app": "ID",
+    "minVersion": "18.0"
+  },
   "manifestVersion": 5,
   "entrypoints": [
     {
       "type": "panel",
       "id": "main",
+      "main": "src/index.html",
       "label": {
         "default": "Catalog Builder"
       },
@@ -34,28 +34,6 @@
       }
     }
   ],
-  "icons": [
-    {
-      "width": 24,
-      "height": 24,
-      "path": "assets/icons/icon-24.png",
-      "scale": [
-        1,
-        2
-      ],
-      "theme": [
-        "dark",
-        "lightest",
-        "light",
-        "medium",
-        "darkest",
-        "all"
-      ],
-      "species": [
-        "generic"
-      ]
-    }
-  ],
   "requiredPermissions": [
     {
       "name": "localFileSystem",
@@ -68,9 +46,6 @@
     {
       "name": "clipboard",
       "access": "readWrite"
-    },
-    {
-      "name": "allowCodeGenerationFromStrings"
     }
   ]
 }
