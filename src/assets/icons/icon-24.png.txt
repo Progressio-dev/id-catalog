@@ -1,0 +1,7 @@
+This is a placeholder for the plugin icon.
+In a production environment, replace this with actual PNG files:
+- icon-24.png (24x24 pixels)
+- icon-24@2x.png (48x48 pixels for Retina displays)
+
+The icon should be a simple, recognizable symbol representing catalog/grid layout.
+Use Adobe Spectrum color palette for consistency.

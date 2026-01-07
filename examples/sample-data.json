@@ -1,0 +1,49 @@
+{
+  "records": [
+    {
+      "productName": "Modern Office Chair",
+      "sku": "CH-001",
+      "price": 299.99,
+      "description": "Ergonomic office chair with lumbar support",
+      "category": "Furniture",
+      "image": "images/chair-001.jpg",
+      "stock": 25
+    },
+    {
+      "productName": "Standing Desk",
+      "sku": "DK-002",
+      "price": 599.99,
+      "description": "Adjustable height standing desk",
+      "category": "Furniture",
+      "image": "images/desk-002.jpg",
+      "stock": 15
+    },
+    {
+      "productName": "LED Desk Lamp",
+      "sku": "LP-003",
+      "price": 79.99,
+      "description": "Adjustable LED desk lamp with USB charging",
+      "category": "Lighting",
+      "image": "images/lamp-003.jpg",
+      "stock": 50
+    },
+    {
+      "productName": "Wireless Mouse",
+      "sku": "MS-004",
+      "price": 29.99,
+      "description": "Ergonomic wireless mouse with precision tracking",
+      "category": "Electronics",
+      "image": "images/mouse-004.jpg",
+      "stock": 100
+    },
+    {
+      "productName": "Mechanical Keyboard",
+      "sku": "KB-005",
+      "price": 149.99,
+      "description": "RGB backlit mechanical keyboard",
+      "category": "Electronics",
+      "image": "images/keyboard-005.jpg",
+      "stock": 75
+    }
+  ]
+}
