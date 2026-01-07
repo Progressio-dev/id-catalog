@@ -750,8 +750,9 @@ function loadSettings() {
         const saved = localStorage.getItem('catalogBuilderSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            // Use spread operator for safe shallow merge - prevents mutation of original object
-            // and creates a new object with merged properties
+            // Use spread operator for shallow merge - creates new object without mutating original
+            // Note: Only creates new top-level object; nested objects would still be shared
+            // This is sufficient for the flat settings object structure
             AppState.settings = { ...AppState.settings, ...settings };
             
             // Update UI
