@@ -53,26 +53,31 @@ let logger;
 // Fallback: Check if modules loaded
 let modulesLoaded = false;
 
-// Test if imports worked
+// Test if imports worked - using timeout to ensure imports have completed
+// UXP may need a brief delay for module resolution
+const MODULE_LOAD_CHECK_DELAY = 100; // milliseconds
+
 setTimeout(() => {
     if (typeof DataImporter === 'undefined') {
         console.error('ES6 MODULES FAILED TO LOAD!');
         console.error('DataImporter is undefined');
         
-        // Show error to user
-        document.body.innerHTML = `
-            <div style="padding: 20px; background: #f44336; color: white;">
-                <h1>Module Loading Error</h1>
-                <p>ES6 modules failed to load. This may be a compatibility issue with InDesign 2026.</p>
-                <p>Please check the UXP Developer Tool logs.</p>
-                <p>Try reloading the plugin or restarting InDesign.</p>
-            </div>
+        // Show error to user - append to body instead of replacing
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f44336; color: white; padding: 20px; z-index: 9999; overflow: auto;';
+        errorDiv.innerHTML = `
+            <h1>Module Loading Error</h1>
+            <p>ES6 modules failed to load. This may be a compatibility issue with InDesign 2026.</p>
+            <p>Please check the UXP Developer Tool logs.</p>
+            <p>Try reloading the plugin or restarting InDesign.</p>
         `;
+        document.body.appendChild(errorDiv);
+        modulesLoaded = false;
     } else {
         console.log('ES6 modules loaded successfully');
         modulesLoaded = true;
     }
-}, 100);
+}, MODULE_LOAD_CHECK_DELAY);
 
 /**
  * Initialize the plugin
