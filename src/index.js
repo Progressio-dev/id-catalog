@@ -1,21 +1,10 @@
 /**
- * ID Catalog Builder - Main Entry Point
+ * ID Catalog Builder - Main Entry Point (Non-Module Version)
  * Professional Catalog Creation Plugin for Adobe InDesign (UXP)
+ * Compatible with InDesign 2026 - NO ES6 MODULES
  */
 
-// Import modules
-import DataImporter from './modules/dataImport.js';
-import DataMapper from './modules/dataMapping.js';
-import PageGenerator from './modules/pageGenerator.js';
-import TemplateManager from './modules/templateManager.js';
-import ImageManager from './modules/imageManager.js';
-import UpdateEngine from './modules/updateEngine.js';
-import FormulaEngine from './modules/formulas.js';
-import FilterEngine from './modules/filtering.js';
-import GroupingEngine from './modules/grouping.js';
-import CrossReferenceEngine from './modules/crossReferences.js';
-import LocalizationEngine from './modules/localization.js';
-import { Logger, showStatus, showError, showSuccess } from './modules/utils.js';
+console.log('=== INDEX.JS LOADING ===');
 
 // Application state
 const AppState = {
@@ -30,314 +19,76 @@ const AppState = {
         enableLogging: true
     },
     currentFile: null,
-    dataType: 'csv',
-    filteredData: null,
-    groupedData: null,
-    currentLanguage: 'en'
+    dataType: 'csv'
 };
 
-// Module instances
-let dataImporter;
-let dataMapper;
-let pageGenerator;
-let templateManager;
-let imageManager;
-let updateEngine;
-let formulaEngine;
-let filterEngine;
-let groupingEngine;
-let crossRefEngine;
-let localizationEngine;
-let logger;
-
-// Fallback: Check if modules loaded
-let modulesLoaded = false;
-
-// Test if imports worked - using timeout to ensure imports have completed
-// UXP may need a brief delay for module resolution
-const MODULE_LOAD_CHECK_DELAY = 100; // milliseconds
-
-setTimeout(() => {
-    if (typeof DataImporter === 'undefined') {
-        console.error('ES6 MODULES FAILED TO LOAD!');
-        console.error('DataImporter is undefined');
-        
-        // Show error to user - append to body instead of replacing
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-panel';
-        
-        const heading = document.createElement('h1');
-        heading.textContent = 'Module Loading Error';
-        errorDiv.appendChild(heading);
-        
-        const p1 = document.createElement('p');
-        p1.textContent = 'ES6 modules failed to load. This may be a compatibility issue with InDesign 2026.';
-        errorDiv.appendChild(p1);
-        
-        const p2 = document.createElement('p');
-        p2.textContent = 'Please check the UXP Developer Tool logs.';
-        errorDiv.appendChild(p2);
-        
-        const p3 = document.createElement('p');
-        p3.textContent = 'Try reloading the plugin or restarting InDesign.';
-        errorDiv.appendChild(p3);
-        
-        document.body.appendChild(errorDiv);
-        modulesLoaded = false;
-    } else {
-        console.log('ES6 modules loaded successfully');
-        modulesLoaded = true;
+// Utility functions
+function showStatus(message) {
+    console.log('STATUS:', message);
+    const statusEl = document.getElementById('statusMessage');
+    if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.style.color = '#666';
     }
-}, MODULE_LOAD_CHECK_DELAY);
+}
 
-/**
- * Initialize the plugin
- */
-async function initialize() {
-    try {
-        console.log('=== CATALOG BUILDER INITIALIZATION START ===');
-        
-        // Create a visible error panel if initialization fails
-        const errorDisplay = document.createElement('div');
-        errorDisplay.id = 'init-error';
-        errorDisplay.className = 'init-error';
-        document.body.appendChild(errorDisplay);
-        
-        logger = new Logger('CatalogBuilder');
-        logger.info('Initializing Catalog Builder Plugin...');
-        console.log('Logger initialized');
+function showError(message) {
+    console.error('ERROR:', message);
+    const statusEl = document.getElementById('statusMessage');
+    if (statusEl) {
+        statusEl.textContent = '❌ ' + message;
+        statusEl.style.color = '#f44336';
+    }
+}
 
-        // Initialize modules with detailed logging
-        console.log('Initializing DataImporter...');
-        dataImporter = new DataImporter();
-        
-        console.log('Initializing DataMapper...');
-        dataMapper = new DataMapper();
-        
-        console.log('Initializing PageGenerator...');
-        pageGenerator = new PageGenerator();
-        
-        console.log('Initializing TemplateManager...');
-        templateManager = new TemplateManager();
-        
-        console.log('Initializing ImageManager...');
-        imageManager = new ImageManager();
-        
-        console.log('Initializing UpdateEngine...');
-        updateEngine = new UpdateEngine();
-        
-        // Initialize advanced feature modules
-        console.log('Initializing FormulaEngine...');
-        formulaEngine = new FormulaEngine();
-        
-        console.log('Initializing FilterEngine...');
-        filterEngine = new FilterEngine();
-        
-        console.log('Initializing GroupingEngine...');
-        groupingEngine = new GroupingEngine();
-        
-        console.log('Initializing CrossReferenceEngine...');
-        crossRefEngine = new CrossReferenceEngine();
-        
-        console.log('Initializing LocalizationEngine...');
-        localizationEngine = new LocalizationEngine();
-
-        // Load settings
-        console.log('Loading settings...');
-        await loadSettings();
-        
-        // Load saved configurations for advanced features
-        console.log('Loading formulas...');
-        formulaEngine.loadFormulas();
-        
-        console.log('Loading filter presets...');
-        filterEngine.loadPresetsFromStorage();
-        
-        console.log('Loading grouping configuration...');
-        groupingEngine.loadConfiguration();
-        
-        console.log('Loading cross-references...');
-        crossRefEngine.load();
-        
-        console.log('Loading localization configuration...');
-        localizationEngine.loadConfiguration();
-
-        // Setup UI event handlers
-        console.log('Setting up event handlers...');
-        setupEventHandlers();
-
-        // Setup tab navigation
-        console.log('Setting up tabs...');
-        setupTabs();
-
-        console.log('=== PLUGIN INITIALIZED SUCCESSFULLY ===');
-        logger.info('Plugin initialized successfully');
-        showStatus('Ready');
-    } catch (error) {
-        console.error('=== PLUGIN INITIALIZATION FAILED ===');
-        console.error('Error details:', error);
-        console.error('Error stack:', error.stack);
-        
-        // Show visible error to user
-        const errorDisplay = document.getElementById('init-error');
-        if (errorDisplay) {
-            errorDisplay.style.display = 'block';
-            
-            // Safely create error display without innerHTML
-            const heading = document.createElement('h2');
-            heading.textContent = 'Plugin Initialization Failed';
-            errorDisplay.appendChild(heading);
-            
-            const errorPara = document.createElement('p');
-            const errorLabel = document.createElement('strong');
-            errorLabel.textContent = 'Error: ';
-            errorPara.appendChild(errorLabel);
-            const errorText = document.createTextNode(error.message);
-            errorPara.appendChild(errorText);
-            errorDisplay.appendChild(errorPara);
-            
-            const stackPara = document.createElement('p');
-            const stackLabel = document.createElement('strong');
-            stackLabel.textContent = 'Stack:';
-            stackPara.appendChild(stackLabel);
-            errorDisplay.appendChild(stackPara);
-            
-            const stackDetail = document.createElement('div');
-            stackDetail.className = 'error-detail';
-            stackDetail.textContent = error.stack || 'No stack trace available';
-            errorDisplay.appendChild(stackDetail);
-            
-            const logsPara = document.createElement('p');
-            logsPara.textContent = 'Check UXP Developer Tool logs for more details.';
-            errorDisplay.appendChild(logsPara);
-        }
-        
-        // Also show in UI if possible
-        const statusMessage = document.getElementById('statusMessage');
-        if (statusMessage) {
-            statusMessage.textContent = '❌ Initialization failed: ' + error.message;
-            statusMessage.style.color = '#f44336';
-        }
-        
-        if (logger) {
-            logger.error('Failed to initialize plugin:', error);
-        }
-        
-        // Re-throw to ensure it appears in console
-        throw error;
+function showSuccess(message) {
+    console.log('SUCCESS:', message);
+    const statusEl = document.getElementById('statusMessage');
+    if (statusEl) {
+        statusEl.textContent = '✓ ' + message;
+        statusEl.style.color = '#4caf50';
     }
 }
 
 /**
- * Setup tab navigation
+ * CSV Parser - Simple implementation without external dependencies
  */
-function setupTabs() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const tabName = button.getAttribute('data-tab');
-            
-            // Update active states
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanes.forEach(pane => pane.classList.remove('active'));
-            
-            button.classList.add('active');
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-        });
+function parseCSV(content, delimiter = ',', hasHeader = true) {
+    console.log('Parsing CSV, length:', content.length);
+    
+    const lines = content.split(/\r?\n/).filter(line => line.trim());
+    if (lines.length === 0) {
+        throw new Error('Empty CSV file');
+    }
+    
+    const headers = hasHeader ? lines[0].split(delimiter).map(h => h.trim()) : null;
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+    
+    const records = dataLines.map((line, idx) => {
+        const values = line.split(delimiter).map(v => v.trim());
+        const record = {};
+        
+        if (hasHeader && headers) {
+            headers.forEach((header, i) => {
+                record[header] = values[i] || '';
+            });
+        } else {
+            values.forEach((value, i) => {
+                record[`column_${i}`] = value;
+            });
+        }
+        
+        return record;
     });
     
-    // Setup sub-tab navigation for Advanced tab
-    const subTabButtons = document.querySelectorAll('.sub-tab-button');
-    const subTabPanes = document.querySelectorAll('.sub-tab-pane');
+    const fields = hasHeader && headers ? headers : Object.keys(records[0] || {});
     
-    subTabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const subTabName = button.getAttribute('data-subtab');
-            
-            // Update active states
-            subTabButtons.forEach(btn => btn.classList.remove('active'));
-            subTabPanes.forEach(pane => pane.classList.remove('active'));
-            
-            button.classList.add('active');
-            document.getElementById(`${subTabName}-subtab`).classList.add('active');
-        });
-    });
-}
-
-/**
- * Setup event handlers for UI elements
- */
-function setupEventHandlers() {
-    // Import Tab
-    document.getElementById('dataSourceType').addEventListener('change', handleDataSourceTypeChange);
-    document.getElementById('selectFileBtn').addEventListener('click', handleSelectFile);
-    document.getElementById('importBtn').addEventListener('click', handleImportData);
-
-    // Mapping Tab
-    document.getElementById('detectFramesBtn').addEventListener('click', handleDetectFrames);
-    document.getElementById('saveMappingBtn').addEventListener('click', handleSaveMapping);
-    document.getElementById('loadMappingBtn').addEventListener('click', handleLoadMapping);
-    document.getElementById('clearMappingBtn').addEventListener('click', handleClearMapping);
-
-    // Template Tab
-    document.getElementById('layoutType').addEventListener('change', handleLayoutTypeChange);
-    document.getElementById('createTemplateBtn').addEventListener('click', handleCreateTemplate);
-    document.getElementById('saveTemplateBtn').addEventListener('click', handleSaveTemplate);
-
-    // Generate Tab
-    document.getElementById('generateBtn').addEventListener('click', handleGenerateCatalog);
-    document.getElementById('updateBtn').addEventListener('click', handleUpdateCatalog);
-
-    // Settings Tab
-    document.getElementById('browseImagePathBtn').addEventListener('click', handleBrowseImagePath);
-    document.getElementById('saveSettingsBtn').addEventListener('click', handleSaveSettings);
-    document.getElementById('resetSettingsBtn').addEventListener('click', handleResetSettings);
-    document.getElementById('clearCacheBtn').addEventListener('click', handleClearCache);
-    document.getElementById('exportLogsBtn').addEventListener('click', handleExportLogs);
+    console.log('CSV parsed:', records.length, 'records,', fields.length, 'fields');
     
-    // Advanced Tab - Formulas
-    document.getElementById('testFormulaBtn').addEventListener('click', handleTestFormula);
-    document.getElementById('addFormulaBtn').addEventListener('click', handleAddFormula);
-    document.getElementById('clearFormulaBtn').addEventListener('click', handleClearFormula);
-    document.getElementById('formulaTemplates').addEventListener('change', handleFormulaTemplateChange);
-    
-    // Advanced Tab - Filtering
-    document.getElementById('addFilterBtn').addEventListener('click', handleAddFilter);
-    document.getElementById('addSortBtn').addEventListener('click', handleAddSort);
-    document.getElementById('applyFiltersBtn').addEventListener('click', handleApplyFilters);
-    document.getElementById('clearFiltersBtn').addEventListener('click', handleClearFilters);
-    document.getElementById('saveFilterPresetBtn').addEventListener('click', handleSaveFilterPreset);
-    document.getElementById('loadFilterPresetBtn').addEventListener('click', handleLoadFilterPreset);
-    
-    // Advanced Tab - Grouping
-    document.getElementById('addGroupBtn').addEventListener('click', handleAddGroup);
-    document.getElementById('applyGroupingBtn').addEventListener('click', handleApplyGrouping);
-    document.getElementById('clearGroupingBtn').addEventListener('click', handleClearGrouping);
-    
-    // Advanced Tab - Cross-References
-    document.getElementById('addReferenceBtn').addEventListener('click', handleAddReference);
-    document.getElementById('validateReferencesBtn').addEventListener('click', handleValidateReferences);
-    document.getElementById('importReferencesBtn').addEventListener('click', handleImportReferences);
-    
-    // Advanced Tab - Localization
-    document.getElementById('catalogLanguage').addEventListener('change', handleLanguageChange);
-    document.getElementById('autoDetectFieldsBtn').addEventListener('click', handleAutoDetectFields);
-    document.getElementById('applyLocalizationBtn').addEventListener('click', handleApplyLocalization);
-    document.getElementById('generateAllLanguagesBtn').addEventListener('click', handleGenerateAllLanguages);
-}
-
-/**
- * Handle data source type change
- */
-function handleDataSourceTypeChange(event) {
-    const type = event.target.value;
-    AppState.dataType = type;
-
-    // Show/hide relevant options
-    document.getElementById('csvOptions').style.display = type === 'csv' ? 'block' : 'none';
-    document.getElementById('excelOptions').style.display = type === 'excel' ? 'block' : 'none';
+    return {
+        records: records,
+        fields: fields
+    };
 }
 
 /**
@@ -345,15 +96,41 @@ function handleDataSourceTypeChange(event) {
  */
 async function handleSelectFile() {
     try {
-        const file = await dataImporter.selectFile(AppState.dataType);
+        console.log('=== SELECT FILE CLICKED ===');
+        showStatus('Opening file picker...');
+        
+        const fs = require('uxp').storage.localFileSystem;
+        
+        console.log('File system API loaded');
+        
+        const file = await fs.getFileForOpening({
+            types: ['csv', 'txt', 'json', 'xml', 'xlsx', 'xls']
+        });
+        
+        console.log('File picker closed, result:', !!file);
+        
         if (file) {
             AppState.currentFile = file;
-            document.getElementById('selectedFile').textContent = file.name;
-            document.getElementById('importBtn').disabled = false;
-            showStatus(`File selected: ${file.name}`);
+            console.log('Selected file:', file.name);
+            
+            const selectedFileEl = document.getElementById('selectedFile');
+            if (selectedFileEl) {
+                selectedFileEl.textContent = file.name;
+            }
+            
+            const importBtn = document.getElementById('importBtn');
+            if (importBtn) {
+                importBtn.disabled = false;
+            }
+            
+            showStatus('File selected: ' + file.name);
+        } else {
+            console.log('No file selected');
+            showStatus('No file selected');
         }
     } catch (error) {
-        logger.error('File selection failed:', error);
+        console.error('File selection error:', error);
+        console.error('Error stack:', error.stack);
         showError('Failed to select file: ' + error.message);
     }
 }
@@ -363,34 +140,75 @@ async function handleSelectFile() {
  */
 async function handleImportData() {
     try {
+        console.log('=== IMPORT DATA CLICKED ===');
+        
+        if (!AppState.currentFile) {
+            showError('No file selected');
+            return;
+        }
+        
         showStatus('Importing data...');
+        console.log('Reading file:', AppState.currentFile.name);
         
-        const options = {
-            type: AppState.dataType,
-            delimiter: document.getElementById('csvDelimiter')?.value || ',',
-            encoding: document.getElementById('csvEncoding')?.value || 'utf-8',
-            hasHeader: document.getElementById('csvHeader')?.checked ?? true,
-            sheet: parseInt(document.getElementById('excelSheet')?.value || '0')
-        };
-
-        const data = await dataImporter.importData(AppState.currentFile, options);
+        // Read file content
+        const content = await AppState.currentFile.read();
+        console.log('File content read, length:', content.length);
+        
+        // Parse based on file type
+        let data;
+        if (AppState.dataType === 'csv') {
+            const delimiterEl = document.getElementById('csvDelimiter');
+            const delimiter = delimiterEl ? delimiterEl.value : ',';
+            
+            const hasHeaderEl = document.getElementById('csvHeader');
+            const hasHeader = hasHeaderEl ? hasHeaderEl.checked : true;
+            
+            console.log('Parsing CSV with delimiter:', delimiter, 'hasHeader:', hasHeader);
+            data = parseCSV(content, delimiter, hasHeader);
+        } else {
+            throw new Error('Only CSV files are currently supported in this version');
+        }
+        
         AppState.data = data;
-
-        // Show preview
+        console.log('Data imported:', data.records.length, 'records');
+        
+        // Update UI
         displayDataPreview(data);
-        
-        // Update source fields in mapping tab
         updateSourceFields(data.fields);
+        updateAdvancedFieldDropdowns(data.fields);
         
-        // Update field dropdowns in advanced features
-        updateAdvancedFieldDropdowns();
-
-        showSuccess(`Imported ${data.records.length} records`);
+        showSuccess('Imported ' + data.records.length + ' records');
         
         // Auto-switch to mapping tab
-        document.querySelector('[data-tab="mapping"]').click();
+        console.log('Attempting to switch to mapping tab...');
+        const mappingTab = document.querySelector('[data-tab="mapping"]');
+        console.log('Mapping tab button found:', !!mappingTab);
+        
+        if (mappingTab) {
+            // Remove active from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Activate mapping tab
+            mappingTab.classList.add('active');
+            const mappingPane = document.getElementById('mapping-tab');
+            if (mappingPane) {
+                mappingPane.classList.add('active');
+                console.log('Mapping tab activated successfully');
+            } else {
+                console.error('Mapping pane not found');
+            }
+        } else {
+            console.error('Mapping tab button not found');
+        }
+        
     } catch (error) {
-        logger.error('Data import failed:', error);
+        console.error('Import error:', error);
+        console.error('Error stack:', error.stack);
         showError('Failed to import data: ' + error.message);
     }
 }
@@ -399,357 +217,214 @@ async function handleImportData() {
  * Display data preview
  */
 function displayDataPreview(data) {
+    console.log('Displaying data preview');
+    
     const previewPanel = document.getElementById('dataPreview');
     const previewTable = document.getElementById('previewTable');
+    const recordCountEl = document.getElementById('recordCount');
+    const columnCountEl = document.getElementById('columnCount');
     
-    document.getElementById('recordCount').textContent = `Records: ${data.records.length}`;
-    document.getElementById('columnCount').textContent = `Columns: ${data.fields.length}`;
-
-    // Create preview table
-    let html = '<table><thead><tr>';
-    data.fields.forEach(field => {
-        html += `<th>${field}</th>`;
-    });
-    html += '</tr></thead><tbody>';
-
-    // Show first 10 records
-    const previewRecords = data.records.slice(0, 10);
-    previewRecords.forEach(record => {
-        html += '<tr>';
+    if (recordCountEl) {
+        recordCountEl.textContent = 'Records: ' + data.records.length;
+    }
+    if (columnCountEl) {
+        columnCountEl.textContent = 'Columns: ' + data.fields.length;
+    }
+    
+    if (previewTable) {
+        // Create preview table
+        let html = '<table><thead><tr>';
         data.fields.forEach(field => {
-            html += `<td>${record[field] || ''}</td>`;
+            html += '<th>' + field + '</th>';
         });
-        html += '</tr>';
-    });
-    html += '</tbody></table>';
-
-    previewTable.innerHTML = html;
-    previewPanel.style.display = 'block';
+        html += '</tr></thead><tbody>';
+        
+        // Show first 10 records
+        const previewRecords = data.records.slice(0, 10);
+        previewRecords.forEach(record => {
+            html += '<tr>';
+            data.fields.forEach(field => {
+                html += '<td>' + (record[field] || '') + '</td>';
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        
+        previewTable.innerHTML = html;
+    }
+    
+    if (previewPanel) {
+        previewPanel.style.display = 'block';
+    }
 }
 
 /**
  * Update source fields list
  */
 function updateSourceFields(fields) {
+    console.log('Updating source fields:', fields.length);
     const container = document.getElementById('sourceFieldsList');
+    if (!container) return;
+    
     container.innerHTML = '';
-
+    
     fields.forEach(field => {
         const fieldItem = document.createElement('div');
         fieldItem.className = 'field-item';
         fieldItem.textContent = field;
-        fieldItem.draggable = true;
-        fieldItem.dataset.field = field;
-        
-        fieldItem.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('field', field);
-        });
-
         container.appendChild(fieldItem);
     });
 }
 
 /**
- * Handle frame detection
+ * Update field dropdowns in advanced features
+ */
+function updateAdvancedFieldDropdowns(fields) {
+    console.log('Updating advanced field dropdowns');
+    
+    // Update formula fields list
+    const formulaFieldsList = document.getElementById('formulaFieldsList');
+    if (formulaFieldsList) {
+        formulaFieldsList.innerHTML = fields.map(f => 
+            '<div class="field-item">{' + f + '}</div>'
+        ).join('');
+    }
+    
+    // Update filter field dropdown
+    const filterField = document.getElementById('filterField');
+    if (filterField) {
+        filterField.innerHTML = '<option value="">Select field...</option>' + 
+            fields.map(f => '<option value="' + f + '">' + f + '</option>').join('');
+    }
+    
+    // Update sort field dropdown
+    const sortField = document.getElementById('sortField');
+    if (sortField) {
+        sortField.innerHTML = '<option value="">Select field...</option>' + 
+            fields.map(f => '<option value="' + f + '">' + f + '</option>').join('');
+    }
+    
+    // Update group field dropdown
+    const groupField = document.getElementById('groupField');
+    if (groupField) {
+        groupField.innerHTML = '<option value="">Select field...</option>' + 
+            fields.map(f => '<option value="' + f + '">' + f + '</option>').join('');
+    }
+}
+
+/**
+ * Handle data source type change
+ */
+function handleDataSourceTypeChange(event) {
+    const type = event.target.value;
+    AppState.dataType = type;
+    console.log('Data source type changed to:', type);
+    
+    // Show/hide relevant options
+    const csvOptions = document.getElementById('csvOptions');
+    const excelOptions = document.getElementById('excelOptions');
+    
+    if (csvOptions) {
+        csvOptions.style.display = type === 'csv' ? 'block' : 'none';
+    }
+    if (excelOptions) {
+        excelOptions.style.display = type === 'excel' ? 'block' : 'none';
+    }
+}
+
+/**
+ * Handle detect frames (placeholder)
  */
 async function handleDetectFrames() {
     try {
-        showStatus('Detecting frames...');
-        const frames = await dataMapper.detectFrames();
-        updateTargetFrames(frames);
-        showSuccess(`Found ${frames.length} frames`);
+        console.log('Detect frames clicked');
+        showStatus('Frame detection not yet implemented');
     } catch (error) {
-        logger.error('Frame detection failed:', error);
+        console.error('Frame detection error:', error);
         showError('Failed to detect frames: ' + error.message);
     }
 }
 
 /**
- * Update target frames list
+ * Placeholder handlers for other functionality
  */
-function updateTargetFrames(frames) {
-    const container = document.getElementById('targetFramesList');
-    container.innerHTML = '';
-
-    frames.forEach(frame => {
-        const frameItem = document.createElement('div');
-        frameItem.className = 'frame-item';
-        frameItem.textContent = frame.label || `${frame.type} Frame`;
-        frameItem.dataset.frameId = frame.id;
-        
-        frameItem.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            frameItem.classList.add('drag-over');
-        });
-
-        frameItem.addEventListener('dragleave', () => {
-            frameItem.classList.remove('drag-over');
-        });
-
-        frameItem.addEventListener('drop', (e) => {
-            e.preventDefault();
-            frameItem.classList.remove('drag-over');
-            
-            const field = e.dataTransfer.getData('field');
-            if (field) {
-                createMapping(field, frame);
-            }
-        });
-
-        container.appendChild(frameItem);
-    });
+function handleSaveMapping() {
+    console.log('Save mapping clicked');
+    showStatus('Save mapping not yet implemented');
 }
 
-/**
- * Create a field mapping
- */
-function createMapping(field, frame) {
-    const mapping = {
-        field: field,
-        frameId: frame.id,
-        frameLabel: frame.label || `${frame.type} Frame`,
-        frameType: frame.type
-    };
-
-    AppState.mappings.push(mapping);
-    displayMappings();
-    showSuccess(`Mapped "${field}" to frame`);
+function handleLoadMapping() {
+    console.log('Load mapping clicked');
+    showStatus('Load mapping not yet implemented');
 }
 
-/**
- * Display current mappings
- */
-function displayMappings() {
-    const container = document.getElementById('mappingList');
-    container.innerHTML = '<h3>Current Mappings</h3>';
-
-    if (AppState.mappings.length === 0) {
-        container.innerHTML += '<p class="empty-message">No mappings created</p>';
-        return;
-    }
-
-    const list = document.createElement('ul');
-    list.className = 'mapping-items';
-
-    AppState.mappings.forEach((mapping, index) => {
-        const item = document.createElement('li');
-        item.className = 'mapping-item';
-        item.innerHTML = `
-            <span class="mapping-field">${mapping.field}</span>
-            <span class="mapping-arrow">→</span>
-            <span class="mapping-frame">${mapping.frameLabel}</span>
-            <button class="btn-remove" data-index="${index}">×</button>
-        `;
-
-        item.querySelector('.btn-remove').addEventListener('click', () => {
-            AppState.mappings.splice(index, 1);
-            displayMappings();
-        });
-
-        list.appendChild(item);
-    });
-
-    container.appendChild(list);
-}
-
-/**
- * Handle save mapping
- */
-async function handleSaveMapping() {
-    try {
-        await dataMapper.saveMapping(AppState.mappings);
-        showSuccess('Mapping saved successfully');
-    } catch (error) {
-        logger.error('Failed to save mapping:', error);
-        showError('Failed to save mapping: ' + error.message);
-    }
-}
-
-/**
- * Handle load mapping
- */
-async function handleLoadMapping() {
-    try {
-        const mappings = await dataMapper.loadMapping();
-        if (mappings) {
-            AppState.mappings = mappings;
-            displayMappings();
-            showSuccess('Mapping loaded successfully');
-        }
-    } catch (error) {
-        logger.error('Failed to load mapping:', error);
-        showError('Failed to load mapping: ' + error.message);
-    }
-}
-
-/**
- * Handle clear mapping
- */
 function handleClearMapping() {
+    console.log('Clear mapping clicked');
     AppState.mappings = [];
-    displayMappings();
     showStatus('Mappings cleared');
 }
 
-/**
- * Handle layout type change
- */
 function handleLayoutTypeChange(event) {
     const type = event.target.value;
-    document.getElementById('gridOptions').style.display = type === 'grid' ? 'block' : 'none';
+    const gridOptions = document.getElementById('gridOptions');
+    if (gridOptions) {
+        gridOptions.style.display = type === 'grid' ? 'block' : 'none';
+    }
 }
 
-/**
- * Handle create template
- */
-async function handleCreateTemplate() {
+function handleCreateTemplate() {
+    console.log('Create template clicked');
+    showStatus('Template creation not yet implemented');
+}
+
+function handleSaveTemplate() {
+    console.log('Save template clicked');
+    showStatus('Save template not yet implemented');
+}
+
+function handleGenerateCatalog() {
+    console.log('Generate catalog clicked');
+    
+    if (!AppState.data) {
+        showError('Please import data first');
+        return;
+    }
+    
+    showStatus('Catalog generation not yet implemented');
+}
+
+function handleUpdateCatalog() {
+    console.log('Update catalog clicked');
+    showStatus('Update catalog not yet implemented');
+}
+
+function handleBrowseImagePath() {
+    console.log('Browse image path clicked');
+    showStatus('Browse not yet implemented');
+}
+
+function handleSaveSettings() {
+    console.log('Save settings clicked');
     try {
-        showStatus('Creating template...');
-        
-        const options = {
-            layoutType: document.getElementById('layoutType').value,
-            gridRows: parseInt(document.getElementById('gridRows').value),
-            gridCols: parseInt(document.getElementById('gridCols').value),
-            gridGutter: parseFloat(document.getElementById('gridGutter').value),
-            useMasterPage: document.getElementById('useMasterPage').checked
+        const settings = {
+            defaultImagePath: document.getElementById('defaultImagePath')?.value || '',
+            validateImages: document.getElementById('validateImages')?.checked ?? true,
+            autoSave: document.getElementById('autoSave')?.checked ?? true,
+            batchSize: parseInt(document.getElementById('batchSize')?.value || '100'),
+            enableLogging: document.getElementById('enableLogging')?.checked ?? true
         };
-
-        const template = await templateManager.createTemplate(options);
-        AppState.template = template;
         
-        showSuccess('Template created successfully');
+        AppState.settings = settings;
+        localStorage.setItem('catalogBuilderSettings', JSON.stringify(settings));
+        showSuccess('Settings saved');
     } catch (error) {
-        logger.error('Failed to create template:', error);
-        showError('Failed to create template: ' + error.message);
-    }
-}
-
-/**
- * Handle save template
- */
-async function handleSaveTemplate() {
-    try {
-        await templateManager.saveTemplate(AppState.template);
-        showSuccess('Template saved successfully');
-    } catch (error) {
-        logger.error('Failed to save template:', error);
-        showError('Failed to save template: ' + error.message);
-    }
-}
-
-/**
- * Handle generate catalog
- */
-async function handleGenerateCatalog() {
-    try {
-        if (!AppState.data) {
-            showError('Please import data first');
-            return;
-        }
-
-        if (AppState.mappings.length === 0) {
-            showError('Please create field mappings first');
-            return;
-        }
-
-        showStatus('Generating catalog...');
-        showProgress(true);
-
-        const options = {
-            data: AppState.data,
-            mappings: AppState.mappings,
-            template: AppState.template,
-            startPage: parseInt(document.getElementById('startPage').value),
-            clearExisting: document.getElementById('clearExisting').checked,
-            imageHandling: document.getElementById('imageHandling').value,
-            imagePath: AppState.settings.defaultImagePath,
-            onProgress: updateProgress
-        };
-
-        await pageGenerator.generate(options);
-
-        showProgress(false);
-        showSuccess('Catalog generated successfully!');
-    } catch (error) {
-        logger.error('Catalog generation failed:', error);
-        showProgress(false);
-        showError('Failed to generate catalog: ' + error.message);
-    }
-}
-
-/**
- * Handle update catalog
- */
-async function handleUpdateCatalog() {
-    try {
-        showStatus('Updating catalog...');
-        await updateEngine.update(AppState.data, AppState.mappings);
-        showSuccess('Catalog updated successfully');
-    } catch (error) {
-        logger.error('Failed to update catalog:', error);
-        showError('Failed to update catalog: ' + error.message);
-    }
-}
-
-/**
- * Show/hide progress indicator
- */
-function showProgress(show) {
-    document.getElementById('progressContainer').style.display = show ? 'block' : 'none';
-    if (!show) {
-        document.getElementById('progressBar').style.width = '0%';
-        document.getElementById('progressText').textContent = '';
-    }
-}
-
-/**
- * Update progress
- */
-function updateProgress(current, total, message) {
-    const percent = (current / total) * 100;
-    document.getElementById('progressBar').style.width = `${percent}%`;
-    document.getElementById('progressText').textContent = message || `Processing ${current} of ${total}...`;
-}
-
-/**
- * Handle browse image path
- */
-async function handleBrowseImagePath() {
-    try {
-        const folder = await imageManager.selectFolder();
-        if (folder) {
-            document.getElementById('defaultImagePath').value = folder.nativePath;
-            AppState.settings.defaultImagePath = folder.nativePath;
-        }
-    } catch (error) {
-        logger.error('Failed to select folder:', error);
-        showError('Failed to select folder: ' + error.message);
-    }
-}
-
-/**
- * Handle save settings
- */
-async function handleSaveSettings() {
-    try {
-        AppState.settings.defaultImagePath = document.getElementById('defaultImagePath').value;
-        AppState.settings.validateImages = document.getElementById('validateImages').checked;
-        AppState.settings.autoSave = document.getElementById('autoSave').checked;
-        AppState.settings.batchSize = parseInt(document.getElementById('batchSize').value);
-        AppState.settings.enableLogging = document.getElementById('enableLogging').checked;
-
-        await saveSettings();
-        showSuccess('Settings saved successfully');
-    } catch (error) {
-        logger.error('Failed to save settings:', error);
+        console.error('Save settings error:', error);
         showError('Failed to save settings: ' + error.message);
     }
 }
 
-/**
- * Handle reset settings
- */
 function handleResetSettings() {
+    console.log('Reset settings clicked');
     AppState.settings = {
         defaultImagePath: '',
         validateImages: true,
@@ -759,652 +434,346 @@ function handleResetSettings() {
     };
     
     // Update UI
-    document.getElementById('defaultImagePath').value = '';
-    document.getElementById('validateImages').checked = true;
-    document.getElementById('autoSave').checked = true;
-    document.getElementById('batchSize').value = 100;
-    document.getElementById('enableLogging').checked = true;
+    if (document.getElementById('defaultImagePath')) {
+        document.getElementById('defaultImagePath').value = '';
+    }
+    if (document.getElementById('validateImages')) {
+        document.getElementById('validateImages').checked = true;
+    }
+    if (document.getElementById('autoSave')) {
+        document.getElementById('autoSave').checked = true;
+    }
+    if (document.getElementById('batchSize')) {
+        document.getElementById('batchSize').value = '100';
+    }
+    if (document.getElementById('enableLogging')) {
+        document.getElementById('enableLogging').checked = true;
+    }
     
     showStatus('Settings reset to defaults');
 }
 
-/**
- * Handle clear cache
- */
 function handleClearCache() {
-    // Clear any cached data
+    console.log('Clear cache clicked');
     localStorage.clear();
     showSuccess('Cache cleared');
 }
 
-/**
- * Handle export logs
- */
-async function handleExportLogs() {
-    try {
-        await logger.exportLogs();
-        showSuccess('Logs exported successfully');
-    } catch (error) {
-        showError('Failed to export logs: ' + error.message);
+function handleExportLogs() {
+    console.log('Export logs clicked');
+    showStatus('Export logs not yet implemented');
+}
+
+// Advanced feature placeholder handlers
+function handleTestFormula() {
+    console.log('Test formula clicked');
+    showStatus('Formula testing not yet implemented');
+}
+
+function handleAddFormula() {
+    console.log('Add formula clicked');
+    showStatus('Add formula not yet implemented');
+}
+
+function handleClearFormula() {
+    console.log('Clear formula clicked');
+    const nameEl = document.getElementById('formulaFieldName');
+    const exprEl = document.getElementById('formulaExpression');
+    const previewEl = document.getElementById('formulaPreview');
+    
+    if (nameEl) nameEl.value = '';
+    if (exprEl) exprEl.value = '';
+    if (previewEl) previewEl.textContent = 'Enter a formula to see preview';
+}
+
+function handleFormulaTemplateChange(event) {
+    const template = event.target.value;
+    if (template) {
+        const exprEl = document.getElementById('formulaExpression');
+        if (exprEl) exprEl.value = template;
     }
+}
+
+function handleAddFilter() {
+    console.log('Add filter clicked');
+    showStatus('Add filter not yet implemented');
+}
+
+function handleAddSort() {
+    console.log('Add sort clicked');
+    showStatus('Add sort not yet implemented');
+}
+
+function handleApplyFilters() {
+    console.log('Apply filters clicked');
+    showStatus('Apply filters not yet implemented');
+}
+
+function handleClearFilters() {
+    console.log('Clear filters clicked');
+    showStatus('Filters cleared');
+}
+
+function handleSaveFilterPreset() {
+    console.log('Save filter preset clicked');
+    showStatus('Save preset not yet implemented');
+}
+
+function handleLoadFilterPreset() {
+    console.log('Load filter preset clicked');
+    showStatus('Load preset not yet implemented');
+}
+
+function handleAddGroup() {
+    console.log('Add group clicked');
+    showStatus('Add group not yet implemented');
+}
+
+function handleApplyGrouping() {
+    console.log('Apply grouping clicked');
+    showStatus('Apply grouping not yet implemented');
+}
+
+function handleClearGrouping() {
+    console.log('Clear grouping clicked');
+    showStatus('Grouping cleared');
+}
+
+function handleAddReference() {
+    console.log('Add reference clicked');
+    showStatus('Add reference not yet implemented');
+}
+
+function handleValidateReferences() {
+    console.log('Validate references clicked');
+    showStatus('Validate references not yet implemented');
+}
+
+function handleImportReferences() {
+    console.log('Import references clicked');
+    showStatus('Import references not yet implemented');
+}
+
+function handleLanguageChange(event) {
+    const language = event.target.value;
+    console.log('Language changed to:', language);
+    AppState.currentLanguage = language;
+    showSuccess('Language set to ' + language);
+}
+
+function handleAutoDetectFields() {
+    console.log('Auto-detect fields clicked');
+    showStatus('Auto-detect not yet implemented');
+}
+
+function handleApplyLocalization() {
+    console.log('Apply localization clicked');
+    showStatus('Apply localization not yet implemented');
+}
+
+function handleGenerateAllLanguages() {
+    console.log('Generate all languages clicked');
+    showStatus('Multi-language generation not yet implemented');
+}
+
+/**
+ * Setup tab navigation
+ */
+function setupTabs() {
+    console.log('Setting up tab navigation');
+    
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    console.log('Found', tabButtons.length, 'tab buttons and', tabPanes.length, 'tab panes');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.getAttribute('data-tab');
+            console.log('Tab clicked:', tabName);
+            
+            // Update active states
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            button.classList.add('active');
+            const targetPane = document.getElementById(tabName + '-tab');
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+        });
+    });
+    
+    // Setup sub-tab navigation for Advanced tab
+    const subTabButtons = document.querySelectorAll('.sub-tab-button');
+    const subTabPanes = document.querySelectorAll('.sub-tab-pane');
+    
+    console.log('Found', subTabButtons.length, 'sub-tab buttons and', subTabPanes.length, 'sub-tab panes');
+    
+    subTabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const subTabName = button.getAttribute('data-subtab');
+            console.log('Sub-tab clicked:', subTabName);
+            
+            // Update active states
+            subTabButtons.forEach(btn => btn.classList.remove('active'));
+            subTabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            button.classList.add('active');
+            const targetPane = document.getElementById(subTabName + '-subtab');
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+        });
+    });
+    
+    console.log('Tab navigation setup complete');
+}
+
+/**
+ * Setup event handlers
+ */
+function setupEventHandlers() {
+    console.log('Setting up event handlers');
+    
+    // Helper to safely add event listener
+    function addHandler(id, event, handler) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener(event, handler);
+            console.log('Added', event, 'handler to', id);
+        } else {
+            console.warn('Element not found:', id);
+        }
+    }
+    
+    // Import Tab
+    addHandler('dataSourceType', 'change', handleDataSourceTypeChange);
+    addHandler('selectFileBtn', 'click', handleSelectFile);
+    addHandler('importBtn', 'click', handleImportData);
+    
+    // Mapping Tab
+    addHandler('detectFramesBtn', 'click', handleDetectFrames);
+    addHandler('saveMappingBtn', 'click', handleSaveMapping);
+    addHandler('loadMappingBtn', 'click', handleLoadMapping);
+    addHandler('clearMappingBtn', 'click', handleClearMapping);
+    
+    // Template Tab
+    addHandler('layoutType', 'change', handleLayoutTypeChange);
+    addHandler('createTemplateBtn', 'click', handleCreateTemplate);
+    addHandler('saveTemplateBtn', 'click', handleSaveTemplate);
+    
+    // Generate Tab
+    addHandler('generateBtn', 'click', handleGenerateCatalog);
+    addHandler('updateBtn', 'click', handleUpdateCatalog);
+    
+    // Settings Tab
+    addHandler('browseImagePathBtn', 'click', handleBrowseImagePath);
+    addHandler('saveSettingsBtn', 'click', handleSaveSettings);
+    addHandler('resetSettingsBtn', 'click', handleResetSettings);
+    addHandler('clearCacheBtn', 'click', handleClearCache);
+    addHandler('exportLogsBtn', 'click', handleExportLogs);
+    
+    // Advanced Tab - Formulas
+    addHandler('testFormulaBtn', 'click', handleTestFormula);
+    addHandler('addFormulaBtn', 'click', handleAddFormula);
+    addHandler('clearFormulaBtn', 'click', handleClearFormula);
+    addHandler('formulaTemplates', 'change', handleFormulaTemplateChange);
+    
+    // Advanced Tab - Filtering
+    addHandler('addFilterBtn', 'click', handleAddFilter);
+    addHandler('addSortBtn', 'click', handleAddSort);
+    addHandler('applyFiltersBtn', 'click', handleApplyFilters);
+    addHandler('clearFiltersBtn', 'click', handleClearFilters);
+    addHandler('saveFilterPresetBtn', 'click', handleSaveFilterPreset);
+    addHandler('loadFilterPresetBtn', 'click', handleLoadFilterPreset);
+    
+    // Advanced Tab - Grouping
+    addHandler('addGroupBtn', 'click', handleAddGroup);
+    addHandler('applyGroupingBtn', 'click', handleApplyGrouping);
+    addHandler('clearGroupingBtn', 'click', handleClearGrouping);
+    
+    // Advanced Tab - Cross-References
+    addHandler('addReferenceBtn', 'click', handleAddReference);
+    addHandler('validateReferencesBtn', 'click', handleValidateReferences);
+    addHandler('importReferencesBtn', 'click', handleImportReferences);
+    
+    // Advanced Tab - Localization
+    addHandler('catalogLanguage', 'change', handleLanguageChange);
+    addHandler('autoDetectFieldsBtn', 'click', handleAutoDetectFields);
+    addHandler('applyLocalizationBtn', 'click', handleApplyLocalization);
+    addHandler('generateAllLanguagesBtn', 'click', handleGenerateAllLanguages);
+    
+    console.log('Event handlers setup complete');
 }
 
 /**
  * Load settings from storage
  */
-async function loadSettings() {
+function loadSettings() {
+    console.log('Loading settings from storage');
     try {
         const saved = localStorage.getItem('catalogBuilderSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            AppState.settings = { ...AppState.settings, ...settings };
+            AppState.settings = Object.assign(AppState.settings, settings);
             
             // Update UI
-            document.getElementById('defaultImagePath').value = AppState.settings.defaultImagePath || '';
-            document.getElementById('validateImages').checked = AppState.settings.validateImages;
-            document.getElementById('autoSave').checked = AppState.settings.autoSave;
-            document.getElementById('batchSize').value = AppState.settings.batchSize;
-            document.getElementById('enableLogging').checked = AppState.settings.enableLogging;
+            if (document.getElementById('defaultImagePath')) {
+                document.getElementById('defaultImagePath').value = AppState.settings.defaultImagePath || '';
+            }
+            if (document.getElementById('validateImages')) {
+                document.getElementById('validateImages').checked = AppState.settings.validateImages;
+            }
+            if (document.getElementById('autoSave')) {
+                document.getElementById('autoSave').checked = AppState.settings.autoSave;
+            }
+            if (document.getElementById('batchSize')) {
+                document.getElementById('batchSize').value = AppState.settings.batchSize;
+            }
+            if (document.getElementById('enableLogging')) {
+                document.getElementById('enableLogging').checked = AppState.settings.enableLogging;
+            }
+            
+            console.log('Settings loaded successfully');
         }
     } catch (error) {
-        logger.error('Failed to load settings:', error);
+        console.error('Failed to load settings:', error);
     }
 }
 
 /**
- * Save settings to storage
+ * Initialize the plugin
  */
-async function saveSettings() {
+function initialize() {
     try {
-        localStorage.setItem('catalogBuilderSettings', JSON.stringify(AppState.settings));
+        console.log('=== PLUGIN INITIALIZATION START ===');
+        
+        // Load settings
+        loadSettings();
+        
+        // Setup UI
+        setupTabs();
+        setupEventHandlers();
+        
+        console.log('=== PLUGIN INITIALIZED SUCCESSFULLY ===');
+        showStatus('Ready');
+        
     } catch (error) {
-        logger.error('Failed to save settings:', error);
-        throw error;
+        console.error('=== PLUGIN INITIALIZATION FAILED ===');
+        console.error('Error:', error);
+        console.error('Stack:', error.stack);
+        showError('Initialization failed: ' + error.message);
     }
 }
 
-/**
- * Advanced Features - Formula Handlers
- */
-
-/**
- * Handle formula template change
- */
-function handleFormulaTemplateChange(event) {
-    const template = event.target.value;
-    if (template) {
-        document.getElementById('formulaExpression').value = template;
-    }
-}
-
-/**
- * Handle test formula
- */
-function handleTestFormula() {
-    try {
-        const expression = document.getElementById('formulaExpression').value;
-        if (!expression) {
-            showError('Please enter a formula');
-            return;
-        }
-        
-        // Use first record as sample
-        if (AppState.data && AppState.data.records.length > 0) {
-            const result = formulaEngine.preview(expression, AppState.data.records[0]);
-            document.getElementById('formulaPreview').textContent = `Result: ${result}`;
-            showSuccess('Formula test successful');
-        } else {
-            showError('Import data first to test formula');
-        }
-    } catch (error) {
-        document.getElementById('formulaPreview').textContent = `Error: ${error.message}`;
-        showError('Formula test failed: ' + error.message);
-    }
-}
-
-/**
- * Handle add formula
- */
-function handleAddFormula() {
-    try {
-        const name = document.getElementById('formulaFieldName').value;
-        const expression = document.getElementById('formulaExpression').value;
-        
-        if (!name || !expression) {
-            showError('Please enter field name and formula');
-            return;
-        }
-        
-        formulaEngine.addFormula(name, expression);
-        formulaEngine.saveFormulas();
-        updateFormulasList();
-        
-        // Clear inputs
-        document.getElementById('formulaFieldName').value = '';
-        document.getElementById('formulaExpression').value = '';
-        document.getElementById('formulaPreview').textContent = 'Enter a formula to see preview';
-        
-        showSuccess('Formula added');
-    } catch (error) {
-        showError('Failed to add formula: ' + error.message);
-    }
-}
-
-/**
- * Handle clear formula
- */
-function handleClearFormula() {
-    document.getElementById('formulaFieldName').value = '';
-    document.getElementById('formulaExpression').value = '';
-    document.getElementById('formulaPreview').textContent = 'Enter a formula to see preview';
-}
-
-/**
- * Update formulas list display
- */
-function updateFormulasList() {
-    const container = document.getElementById('formulasContainer');
-    const formulas = formulaEngine.getFormulas();
-    
-    if (formulas.length === 0) {
-        container.innerHTML = '<p class="empty-message">No formulas added</p>';
-        return;
-    }
-    
-    container.innerHTML = formulas.map((formula, index) => `
-        <div class="formula-item">
-            <div>
-                <div class="formula-name">${formula.name}</div>
-                <div class="formula-expression">${formula.expression}</div>
-            </div>
-            <button class="btn-remove" onclick="removeFormula(${index})">×</button>
-        </div>
-    `).join('');
-}
-
-/**
- * Remove a formula
- */
-window.removeFormula = function(index) {
-    const formulas = formulaEngine.getFormulas();
-    if (formulas[index]) {
-        formulaEngine.removeFormula(formulas[index].name);
-        formulaEngine.saveFormulas();
-        updateFormulasList();
-        showSuccess('Formula removed');
-    }
-};
-
-/**
- * Advanced Features - Filter Handlers
- */
-
-/**
- * Handle add filter
- */
-function handleAddFilter() {
-    try {
-        const field = document.getElementById('filterField').value;
-        const operator = document.getElementById('filterOperator').value;
-        const value = document.getElementById('filterValue').value;
-        
-        if (!field || !operator) {
-            showError('Please select field and operator');
-            return;
-        }
-        
-        filterEngine.addFilter({ field, operator, value });
-        updateFiltersList();
-        
-        // Clear inputs
-        document.getElementById('filterValue').value = '';
-        
-        showSuccess('Filter added');
-    } catch (error) {
-        showError('Failed to add filter: ' + error.message);
-    }
-}
-
-/**
- * Handle add sort
- */
-function handleAddSort() {
-    try {
-        const field = document.getElementById('sortField').value;
-        const direction = document.getElementById('sortDirection').value;
-        
-        if (!field) {
-            showError('Please select a field');
-            return;
-        }
-        
-        filterEngine.addSortRule(field, direction);
-        updateSortRulesList();
-        showSuccess('Sort rule added');
-    } catch (error) {
-        showError('Failed to add sort rule: ' + error.message);
-    }
-}
-
-/**
- * Handle apply filters
- */
-function handleApplyFilters() {
-    try {
-        if (!AppState.data) {
-            showError('Import data first');
-            return;
-        }
-        
-        const logic = document.getElementById('filterLogic').value;
-        AppState.filteredData = filterEngine.apply(AppState.data.records, logic);
-        
-        const stats = filterEngine.getStatistics(AppState.data.records, AppState.filteredData);
-        document.getElementById('filterStatsText').textContent = 
-            `Showing ${stats.filtered} of ${stats.total} records (${stats.percentage}%)`;
-        
-        showSuccess(`Filtered to ${stats.filtered} records`);
-    } catch (error) {
-        showError('Failed to apply filters: ' + error.message);
-    }
-}
-
-/**
- * Handle clear filters
- */
-function handleClearFilters() {
-    filterEngine.clearFilters();
-    filterEngine.clearSortRules();
-    updateFiltersList();
-    updateSortRulesList();
-    AppState.filteredData = null;
-    document.getElementById('filterStatsText').textContent = 'No filters applied';
-    showSuccess('Filters cleared');
-}
-
-/**
- * Handle save filter preset
- */
-async function handleSaveFilterPreset() {
-    try {
-        const name = prompt('Enter preset name:');
-        if (name) {
-            filterEngine.savePreset(name);
-            showSuccess('Preset saved');
-        }
-    } catch (error) {
-        showError('Failed to save preset: ' + error.message);
-    }
-}
-
-/**
- * Handle load filter preset
- */
-async function handleLoadFilterPreset() {
-    try {
-        const presets = filterEngine.getPresets();
-        if (presets.length === 0) {
-            showError('No presets available');
-            return;
-        }
-        
-        // Simple selection - in production, use a proper dialog
-        const name = prompt('Enter preset name to load:\n' + presets.map(p => p.name).join('\n'));
-        if (name) {
-            filterEngine.loadPreset(name);
-            updateFiltersList();
-            updateSortRulesList();
-            showSuccess('Preset loaded');
-        }
-    } catch (error) {
-        showError('Failed to load preset: ' + error.message);
-    }
-}
-
-/**
- * Update filters list display
- */
-function updateFiltersList() {
-    const container = document.getElementById('filtersList');
-    const filters = filterEngine.filters;
-    
-    if (filters.length === 0) {
-        container.innerHTML = '<p class="empty-message">No filters added</p>';
-        return;
-    }
-    
-    container.innerHTML = filters.map((filter, index) => `
-        <div class="filter-item">
-            <span>${filter.field}</span>
-            <span>${filter.operator}</span>
-            <span>${filter.value || '-'}</span>
-            <button class="btn-remove" onclick="removeFilter(${index})">×</button>
-        </div>
-    `).join('');
-}
-
-/**
- * Update sort rules list display
- */
-function updateSortRulesList() {
-    const container = document.getElementById('sortRulesList');
-    const rules = filterEngine.sortRules;
-    
-    if (rules.length === 0) {
-        container.innerHTML = '<p class="empty-message">No sort rules</p>';
-        return;
-    }
-    
-    container.innerHTML = rules.map((rule, index) => `
-        <div class="sort-item">
-            <span>Level ${index + 1}</span>
-            <span>${rule.field}</span>
-            <span>${rule.direction}</span>
-            <button class="btn-remove" onclick="removeSortRule(${index})">×</button>
-        </div>
-    `).join('');
-}
-
-/**
- * Remove filter
- */
-window.removeFilter = function(index) {
-    filterEngine.removeFilter(index);
-    updateFiltersList();
-    showSuccess('Filter removed');
-};
-
-/**
- * Remove sort rule
- */
-window.removeSortRule = function(index) {
-    filterEngine.removeSortRule(index);
-    updateSortRulesList();
-    showSuccess('Sort rule removed');
-};
-
-/**
- * Advanced Features - Grouping Handlers
- */
-
-/**
- * Handle add group
- */
-function handleAddGroup() {
-    try {
-        const field = document.getElementById('groupField').value;
-        const direction = document.getElementById('groupDirection').value;
-        
-        if (!field) {
-            showError('Please select a field');
-            return;
-        }
-        
-        groupingEngine.addGroupLevel(field, direction);
-        updateGroupLevelsList();
-        showSuccess('Group level added');
-    } catch (error) {
-        showError('Failed to add group level: ' + error.message);
-    }
-}
-
-/**
- * Handle apply grouping
- */
-function handleApplyGrouping() {
-    try {
-        if (!AppState.data) {
-            showError('Import data first');
-            return;
-        }
-        
-        // Update options
-        groupingEngine.setOptions({
-            showHeaders: document.getElementById('showGroupHeaders').checked,
-            showItemCount: document.getElementById('showItemCount').checked,
-            pageBreakPerGroup: document.getElementById('pageBreakPerGroup').checked,
-            headerStyle: document.getElementById('groupHeaderStyle').value,
-            separatorType: document.getElementById('groupSeparator').value
-        });
-        
-        const records = AppState.filteredData || AppState.data.records;
-        AppState.groupedData = groupingEngine.groupRecords(records);
-        
-        groupingEngine.saveConfiguration();
-        showSuccess('Grouping applied');
-    } catch (error) {
-        showError('Failed to apply grouping: ' + error.message);
-    }
-}
-
-/**
- * Handle clear grouping
- */
-function handleClearGrouping() {
-    groupingEngine.clearGroupLevels();
-    updateGroupLevelsList();
-    AppState.groupedData = null;
-    showSuccess('Grouping cleared');
-}
-
-/**
- * Update group levels list display
- */
-function updateGroupLevelsList() {
-    const container = document.getElementById('groupLevelsList');
-    const levels = groupingEngine.groupLevels;
-    
-    if (levels.length === 0) {
-        container.innerHTML = '<p class="empty-message">No group levels</p>';
-        return;
-    }
-    
-    container.innerHTML = levels.map((level, index) => `
-        <div class="group-level-item">
-            <div>
-                <span class="level-badge">Level ${level.level + 1}</span>
-                <span>${level.field} (${level.sortDirection})</span>
-            </div>
-            <button class="btn-remove" onclick="removeGroupLevel(${index})">×</button>
-        </div>
-    `).join('');
-}
-
-/**
- * Remove group level
- */
-window.removeGroupLevel = function(index) {
-    groupingEngine.removeGroupLevel(index);
-    updateGroupLevelsList();
-    showSuccess('Group level removed');
-};
-
-/**
- * Advanced Features - Cross-Reference Handlers
- */
-
-/**
- * Handle add reference
- */
-function handleAddReference() {
-    try {
-        const sourceId = document.getElementById('refSourceId').value;
-        const targetId = document.getElementById('refTargetId').value;
-        const type = document.getElementById('refType').value;
-        
-        if (!sourceId || !targetId) {
-            showError('Please enter source and target IDs');
-            return;
-        }
-        
-        crossRefEngine.addReference(sourceId, targetId, type);
-        crossRefEngine.save();
-        updateReferencesList();
-        
-        // Clear inputs
-        document.getElementById('refSourceId').value = '';
-        document.getElementById('refTargetId').value = '';
-        
-        showSuccess('Reference added');
-    } catch (error) {
-        showError('Failed to add reference: ' + error.message);
-    }
-}
-
-/**
- * Handle validate references
- */
-function handleValidateReferences() {
-    try {
-        if (!AppState.data) {
-            showError('Import data first');
-            return;
-        }
-        
-        const broken = crossRefEngine.validateReferences(AppState.data.records, 'id');
-        
-        if (broken.length === 0) {
-            showSuccess('All references are valid');
-        } else {
-            showError(`Found ${broken.length} broken references`);
-        }
-    } catch (error) {
-        showError('Validation failed: ' + error.message);
-    }
-}
-
-/**
- * Handle import references
- */
-async function handleImportReferences() {
-    try {
-        if (!AppState.data) {
-            showError('Import data first');
-            return;
-        }
-        
-        const fieldName = prompt('Enter field name containing reference IDs (comma-separated):');
-        if (fieldName) {
-            const count = crossRefEngine.importFromField(AppState.data.records, 'id', fieldName);
-            crossRefEngine.save();
-            updateReferencesList();
-            showSuccess(`Imported ${count} references`);
-        }
-    } catch (error) {
-        showError('Failed to import references: ' + error.message);
-    }
-}
-
-/**
- * Update references list display
- */
-function updateReferencesList() {
-    const container = document.getElementById('referencesContainer');
-    const stats = crossRefEngine.getStatistics();
-    
-    if (stats.totalReferences === 0) {
-        container.innerHTML = '<p class="empty-message">No references added</p>';
-        return;
-    }
-    
-    container.innerHTML = `<p class="info-text">Total References: ${stats.totalReferences}</p>`;
-}
-
-/**
- * Advanced Features - Localization Handlers
- */
-
-/**
- * Handle language change
- */
-function handleLanguageChange(event) {
-    const language = event.target.value;
-    localizationEngine.setLanguage(language);
-    AppState.currentLanguage = language;
-    showSuccess(`Language set to ${language}`);
-}
-
-/**
- * Handle auto-detect fields
- */
-function handleAutoDetectFields() {
-    try {
-        if (!AppState.data) {
-            showError('Import data first');
-            return;
-        }
-        
-        const mappings = localizationEngine.autoDetectFieldMappings(AppState.data.records);
-        localizationEngine.saveConfiguration();
-        showSuccess(`Auto-detected ${mappings.size} field mappings`);
-    } catch (error) {
-        showError('Auto-detection failed: ' + error.message);
-    }
-}
-
-/**
- * Handle apply localization
- */
-function handleApplyLocalization() {
-    try {
-        if (!AppState.data) {
-            showError('Import data first');
-            return;
-        }
-        
-        const localizedData = localizationEngine.localizeDataset(AppState.data.records);
-        AppState.data.records = localizedData;
-        
-        showSuccess('Localization applied');
-    } catch (error) {
-        showError('Failed to apply localization: ' + error.message);
-    }
-}
-
-/**
- * Handle generate all languages
- */
-async function handleGenerateAllLanguages() {
-    try {
-        showError('Multi-language generation will be available in catalog generation');
-    } catch (error) {
-        showError('Failed to generate catalogs: ' + error.message);
-    }
-}
-
-/**
- * Update field dropdowns when data is imported
- */
-function updateAdvancedFieldDropdowns() {
-    if (!AppState.data) return;
-    
-    const fields = AppState.data.fields;
-    
-    // Update formula fields list
-    const formulaFieldsList = document.getElementById('formulaFieldsList');
-    formulaFieldsList.innerHTML = fields.map(f => 
-        `<div class="field-item">{${f}}</div>`
-    ).join('');
-    
-    // Update filter field dropdown
-    const filterField = document.getElementById('filterField');
-    filterField.innerHTML = '<option value="">Select field...</option>' + 
-        fields.map(f => `<option value="${f}">${f}</option>`).join('');
-    
-    // Update sort field dropdown
-    const sortField = document.getElementById('sortField');
-    sortField.innerHTML = '<option value="">Select field...</option>' + 
-        fields.map(f => `<option value="${f}">${f}</option>`).join('');
-    
-    // Update group field dropdown
-    const groupField = document.getElementById('groupField');
-    groupField.innerHTML = '<option value="">Select field...</option>' + 
-        fields.map(f => `<option value="${f}">${f}</option>`).join('');
-}
-
-// Initialize when DOM is loaded
+// Auto-run when ready
 if (document.readyState === 'loading') {
+    console.log('Document still loading, waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', initialize);
 } else {
+    console.log('Document already loaded, initializing immediately');
     initialize();
 }
+
+console.log('=== INDEX.JS LOADED ===');

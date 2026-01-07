@@ -27,18 +27,14 @@
       }
     }
   ],
-  "requiredPermissions": [
-    {
-      "name": "localFileSystem",
-      "access": "readWrite"
-    },
-    {
-      "name": "network",
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess",
+    "network": {
       "domains": "all"
     },
-    {
-      "name": "clipboard",
-      "access": "readWrite"
-    }
-  ]
+    "launchProcess": {
+      "schemes": ["https", "mailto", "file"]
+    },
+    "clipboard": "readAndWrite"
+  }
 }
