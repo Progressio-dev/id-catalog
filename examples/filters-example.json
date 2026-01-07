@@ -1,0 +1,218 @@
+{
+  "version": "1.0",
+  "description": "Example filter and sort configurations",
+  "presets": [
+    {
+      "name": "Electronics Over $100",
+      "description": "Show only electronics products priced over $100",
+      "filters": [
+        {
+          "field": "category",
+          "operator": "equals",
+          "value": "Electronics"
+        },
+        {
+          "field": "price",
+          "operator": "greaterThan",
+          "value": "100"
+        }
+      ],
+      "sortRules": [
+        {
+          "field": "price",
+          "direction": "desc",
+          "type": "number"
+        }
+      ],
+      "filterLogic": "AND"
+    },
+    {
+      "name": "In Stock Items",
+      "description": "Show only items that are in stock",
+      "filters": [
+        {
+          "field": "stock",
+          "operator": "greaterThan",
+          "value": "0"
+        },
+        {
+          "field": "discontinued",
+          "operator": "isFalse"
+        }
+      ],
+      "sortRules": [
+        {
+          "field": "category",
+          "direction": "asc",
+          "type": "string"
+        },
+        {
+          "field": "name",
+          "direction": "asc",
+          "type": "string"
+        }
+      ],
+      "filterLogic": "AND"
+    },
+    {
+      "name": "Featured Products",
+      "description": "Show featured or new products",
+      "filters": [
+        {
+          "field": "featured",
+          "operator": "isTrue"
+        },
+        {
+          "field": "new_arrival",
+          "operator": "isTrue"
+        }
+      ],
+      "sortRules": [
+        {
+          "field": "rating",
+          "direction": "desc",
+          "type": "number"
+        }
+      ],
+      "filterLogic": "OR"
+    },
+    {
+      "name": "Premium Products",
+      "description": "High-end products priced between $500 and $2000",
+      "filters": [
+        {
+          "field": "price",
+          "operator": "between",
+          "min": "500",
+          "max": "2000"
+        }
+      ],
+      "sortRules": [
+        {
+          "field": "brand",
+          "direction": "asc",
+          "type": "string"
+        },
+        {
+          "field": "price",
+          "direction": "desc",
+          "type": "number"
+        }
+      ],
+      "filterLogic": "AND"
+    },
+    {
+      "name": "Office Furniture",
+      "description": "All office furniture sorted by price",
+      "filters": [
+        {
+          "field": "category",
+          "operator": "equals",
+          "value": "Furniture"
+        },
+        {
+          "field": "subcategory",
+          "operator": "contains",
+          "value": "Office"
+        }
+      ],
+      "sortRules": [
+        {
+          "field": "price",
+          "direction": "asc",
+          "type": "number"
+        }
+      ],
+      "filterLogic": "AND"
+    }
+  ],
+  "filter_operators": [
+    {
+      "value": "equals",
+      "label": "Equals",
+      "example": "category equals 'Electronics'"
+    },
+    {
+      "value": "notEquals",
+      "label": "Not Equals",
+      "example": "status notEquals 'discontinued'"
+    },
+    {
+      "value": "contains",
+      "label": "Contains",
+      "example": "description contains 'wireless'"
+    },
+    {
+      "value": "startsWith",
+      "label": "Starts With",
+      "example": "sku startsWith 'ELEC'"
+    },
+    {
+      "value": "endsWith",
+      "label": "Ends With",
+      "example": "product_name endsWith 'Pro'"
+    },
+    {
+      "value": "greaterThan",
+      "label": "Greater Than",
+      "example": "price greaterThan 100"
+    },
+    {
+      "value": "lessThan",
+      "label": "Less Than",
+      "example": "stock lessThan 10"
+    },
+    {
+      "value": "between",
+      "label": "Between",
+      "example": "price between 50 and 500"
+    },
+    {
+      "value": "isEmpty",
+      "label": "Is Empty",
+      "example": "notes isEmpty"
+    },
+    {
+      "value": "isNotEmpty",
+      "label": "Is Not Empty",
+      "example": "image isNotEmpty"
+    }
+  ],
+  "examples": {
+    "sample_filters": {
+      "simple_filter": {
+        "field": "category",
+        "operator": "equals",
+        "value": "Electronics"
+      },
+      "numeric_filter": {
+        "field": "price",
+        "operator": "greaterThan",
+        "value": "100"
+      },
+      "text_filter": {
+        "field": "description",
+        "operator": "contains",
+        "value": "wireless"
+      },
+      "range_filter": {
+        "field": "stock",
+        "operator": "between",
+        "min": "10",
+        "max": "100"
+      }
+    },
+    "sample_sort_rules": [
+      {
+        "field": "category",
+        "direction": "asc",
+        "type": "string"
+      },
+      {
+        "field": "price",
+        "direction": "desc",
+        "type": "number"
+      }
+    ]
+  }
+}
