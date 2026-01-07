@@ -16,21 +16,14 @@
       "label": {
         "default": "Catalog Builder"
       },
+      "icons": [],
       "minimumSize": {
         "width": 400,
         "height": 600
       },
-      "maximumSize": {
-        "width": 1200,
-        "height": 2000
-      },
       "preferredDockedSize": {
         "width": 450,
         "height": 800
-      },
-      "preferredFloatingSize": {
-        "width": 600,
-        "height": 900
       }
     }
   ],
