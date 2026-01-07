@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Catalog Builder</title>
+    <link rel="stylesheet" href="ui/styles.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="app-title">Catalog Builder</h1>
+            <p class="app-subtitle">Professional Catalog Creation for InDesign</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="import">Import Data</button>
+            <button class="tab-button" data-tab="mapping">Field Mapping</button>
+            <button class="tab-button" data-tab="template">Template</button>
+            <button class="tab-button" data-tab="generate">Generate</button>
+            <button class="tab-button" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content">
+            <!-- Import Tab -->
+            <div id="import-tab" class="tab-pane active">
+                <h2>Import Data Source</h2>
+                
+                <div class="form-group">
+                    <label for="dataSourceType">Data Source Type:</label>
+                    <select id="dataSourceType" class="select-input">
+                        <option value="csv">CSV File</option>
+                        <option value="excel">Excel File (.xlsx, .xls)</option>
+                        <option value="json">JSON File</option>
+                        <option value="xml">XML File</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button id="selectFileBtn" class="btn btn-primary">Select File</button>
+                    <span id="selectedFile" class="file-name">No file selected</span>
+                </div>
+
+                <!-- CSV Options -->
+                <div id="csvOptions" class="options-panel">
+                    <h3>CSV Options</h3>
+                    <div class="form-group">
+                        <label for="csvDelimiter">Delimiter:</label>
+                        <select id="csvDelimiter" class="select-input">
+                            <option value=",">Comma (,)</option>
+                            <option value=";">Semicolon (;)</option>
+                            <option value="\t">Tab</option>
+                            <option value="|">Pipe (|)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="csvEncoding">Encoding:</label>
+                        <select id="csvEncoding" class="select-input">
+                            <option value="utf-8">UTF-8</option>
+                            <option value="utf-16">UTF-16</option>
+                            <option value="iso-8859-1">ISO-8859-1</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="csvHeader" checked>
+                            First row contains headers
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Excel Options -->
+                <div id="excelOptions" class="options-panel" style="display: none;">
+                    <h3>Excel Options</h3>
+                    <div class="form-group">
+                        <label for="excelSheet">Sheet:</label>
+                        <select id="excelSheet" class="select-input">
+                            <option value="0">Sheet 1</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button id="importBtn" class="btn btn-success" disabled>Import Data</button>
+                </div>
+
+                <!-- Data Preview -->
+                <div id="dataPreview" class="preview-panel" style="display: none;">
+                    <h3>Data Preview</h3>
+                    <div class="preview-stats">
+                        <span id="recordCount">Records: 0</span>
+                        <span id="columnCount">Columns: 0</span>
+                    </div>
+                    <div id="previewTable" class="preview-table"></div>
+                </div>
+            </div>
+
+            <!-- Mapping Tab -->
+            <div id="mapping-tab" class="tab-pane">
+                <h2>Field Mapping</h2>
+                
+                <div class="mapping-container">
+                    <div class="source-fields">
+                        <h3>Data Fields</h3>
+                        <div id="sourceFieldsList" class="field-list">
+                            <p class="empty-message">Import data first</p>
+                        </div>
+                    </div>
+
+                    <div class="mapping-arrow">→</div>
+
+                    <div class="target-frames">
+                        <h3>InDesign Frames</h3>
+                        <button id="detectFramesBtn" class="btn btn-secondary">Detect Frames</button>
+                        <div id="targetFramesList" class="field-list">
+                            <p class="empty-message">Select a frame in InDesign</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mapping-actions">
+                    <button id="saveMappingBtn" class="btn btn-primary">Save Mapping</button>
+                    <button id="loadMappingBtn" class="btn btn-secondary">Load Mapping</button>
+                    <button id="clearMappingBtn" class="btn btn-danger">Clear Mapping</button>
+                </div>
+
+                <div id="mappingList" class="mapping-list"></div>
+            </div>
+
+            <!-- Template Tab -->
+            <div id="template-tab" class="tab-pane">
+                <h2>Template Manager</h2>
+                
+                <div class="template-options">
+                    <div class="form-group">
+                        <label>Layout Type:</label>
+                        <select id="layoutType" class="select-input">
+                            <option value="flow">Flow Layout</option>
+                            <option value="grid">Grid Layout</option>
+                            <option value="custom">Custom Template</option>
+                        </select>
+                    </div>
+
+                    <div id="gridOptions" style="display: none;">
+                        <div class="form-group">
+                            <label for="gridRows">Rows per Page:</label>
+                            <input type="number" id="gridRows" class="text-input" value="3" min="1" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label for="gridCols">Columns per Page:</label>
+                            <input type="number" id="gridCols" class="text-input" value="2" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="gridGutter">Gutter (mm):</label>
+                            <input type="number" id="gridGutter" class="text-input" value="5" min="0" max="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="useMasterPage">
+                            Use Master Page as Template
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <button id="createTemplateBtn" class="btn btn-primary">Create Template</button>
+                        <button id="saveTemplateBtn" class="btn btn-secondary">Save Template</button>
+                    </div>
+                </div>
+
+                <div id="templateList" class="template-list">
+                    <h3>Saved Templates</h3>
+                    <div id="templatesContainer" class="templates-container">
+                        <p class="empty-message">No templates saved</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Tab -->
+            <div id="generate-tab" class="tab-pane">
+                <h2>Generate Catalog</h2>
+                
+                <div class="generate-summary">
+                    <div class="summary-item">
+                        <label>Data Records:</label>
+                        <span id="genRecordCount">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Mapped Fields:</label>
+                        <span id="genMappedCount">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Template:</label>
+                        <span id="genTemplate">None</span>
+                    </div>
+                </div>
+
+                <div class="generate-options">
+                    <div class="form-group">
+                        <label for="startPage">Start Page:</label>
+                        <input type="number" id="startPage" class="text-input" value="1" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="clearExisting" checked>
+                            Clear existing content
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imageHandling">Image Handling:</label>
+                        <select id="imageHandling" class="select-input">
+                            <option value="fit">Fit to Frame</option>
+                            <option value="fill">Fill Frame</option>
+                            <option value="center">Center in Frame</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="generate-actions">
+                    <button id="generateBtn" class="btn btn-success btn-large">Generate Catalog</button>
+                    <button id="updateBtn" class="btn btn-primary">Update Existing</button>
+                </div>
+
+                <div id="progressContainer" class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progressBar" class="progress-fill"></div>
+                    </div>
+                    <p id="progressText">Processing...</p>
+                </div>
+
+                <div id="generationLog" class="log-container"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-pane">
+                <h2>Settings</h2>
+                
+                <div class="settings-section">
+                    <h3>General Settings</h3>
+                    <div class="form-group">
+                        <label for="defaultImagePath">Default Image Path:</label>
+                        <input type="text" id="defaultImagePath" class="text-input" placeholder="/path/to/images">
+                        <button id="browseImagePathBtn" class="btn btn-secondary">Browse</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="validateImages" checked>
+                            Validate image paths before generation
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="autoSave" checked>
+                            Auto-save document during generation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Performance</h3>
+                    <div class="form-group">
+                        <label for="batchSize">Batch Size:</label>
+                        <input type="number" id="batchSize" class="text-input" value="100" min="10" max="1000">
+                        <small>Number of records to process at once</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Advanced</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="enableLogging" checked>
+                            Enable detailed logging
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <button id="clearCacheBtn" class="btn btn-danger">Clear Cache</button>
+                        <button id="exportLogsBtn" class="btn btn-secondary">Export Logs</button>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+                    <button id="resetSettingsBtn" class="btn btn-secondary">Reset to Defaults</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span id="statusMessage" class="status-message">Ready</span>
+            <span class="version">v1.0.0</span>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>

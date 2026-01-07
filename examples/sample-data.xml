@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+    <product>
+        <productName>Modern Office Chair</productName>
+        <sku>CH-001</sku>
+        <price>299.99</price>
+        <description>Ergonomic office chair with lumbar support</description>
+        <category>Furniture</category>
+        <image>images/chair-001.jpg</image>
+        <stock>25</stock>
+    </product>
+    <product>
+        <productName>Standing Desk</productName>
+        <sku>DK-002</sku>
+        <price>599.99</price>
+        <description>Adjustable height standing desk</description>
+        <category>Furniture</category>
+        <image>images/desk-002.jpg</image>
+        <stock>15</stock>
+    </product>
+    <product>
+        <productName>LED Desk Lamp</productName>
+        <sku>LP-003</sku>
+        <price>79.99</price>
+        <description>Adjustable LED desk lamp with USB charging</description>
+        <category>Lighting</category>
+        <image>images/lamp-003.jpg</image>
+        <stock>50</stock>
+    </product>
+</catalog>

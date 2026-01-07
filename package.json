@@ -1,0 +1,26 @@
+{
+  "name": "id-catalog-builder",
+  "version": "1.0.0",
+  "description": "Professional Catalog Builder Plugin for Adobe InDesign",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"No linter configured yet\"",
+    "build": "echo \"Build complete\""
+  },
+  "keywords": [
+    "adobe",
+    "indesign",
+    "uxp",
+    "plugin",
+    "catalog",
+    "automation"
+  ],
+  "author": "Progressio",
+  "license": "MIT",
+  "dependencies": {
+    "papaparse": "^5.4.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {}
+}
