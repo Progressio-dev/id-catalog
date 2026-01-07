@@ -18,6 +18,7 @@
             <button class="tab-button active" data-tab="import">Import Data</button>
             <button class="tab-button" data-tab="mapping">Field Mapping</button>
             <button class="tab-button" data-tab="template">Template</button>
+            <button class="tab-button" data-tab="advanced">Advanced</button>
             <button class="tab-button" data-tab="generate">Generate</button>
             <button class="tab-button" data-tab="settings">Settings</button>
         </div>
@@ -175,6 +176,338 @@
                     <h3>Saved Templates</h3>
                     <div id="templatesContainer" class="templates-container">
                         <p class="empty-message">No templates saved</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div id="advanced-tab" class="tab-pane">
+                <h2>Advanced Features</h2>
+
+                <!-- Sub-tabs for Advanced features -->
+                <div class="sub-tabs">
+                    <button class="sub-tab-button active" data-subtab="formulas">Formulas</button>
+                    <button class="sub-tab-button" data-subtab="filtering">Filtering & Sorting</button>
+                    <button class="sub-tab-button" data-subtab="grouping">Grouping</button>
+                    <button class="sub-tab-button" data-subtab="references">Cross-References</button>
+                    <button class="sub-tab-button" data-subtab="localization">Localization</button>
+                </div>
+
+                <!-- Formulas Sub-tab -->
+                <div id="formulas-subtab" class="sub-tab-pane active">
+                    <h3>Formula Builder</h3>
+                    
+                    <div class="form-group">
+                        <label for="formulaFieldName">Calculated Field Name:</label>
+                        <input type="text" id="formulaFieldName" class="text-input" placeholder="e.g., price_with_tax">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="formulaExpression">Formula:</label>
+                        <textarea id="formulaExpression" class="formula-input" rows="3" placeholder="e.g., {price} * 1.20"></textarea>
+                        <small>Use {fieldName} to reference fields. Supported functions: ROUND, IF, MIN, MAX, etc.</small>
+                    </div>
+
+                    <div class="formula-helpers">
+                        <div class="helper-section">
+                            <h4>Available Fields</h4>
+                            <div id="formulaFieldsList" class="field-list-small">
+                                <p class="empty-message">Import data first</p>
+                            </div>
+                        </div>
+
+                        <div class="helper-section">
+                            <h4>Functions</h4>
+                            <div class="function-list">
+                                <button class="function-btn" data-func="ROUND(value, decimals)">ROUND</button>
+                                <button class="function-btn" data-func="IF(condition, true, false)">IF</button>
+                                <button class="function-btn" data-func="MIN(a, b)">MIN</button>
+                                <button class="function-btn" data-func="MAX(a, b)">MAX</button>
+                                <button class="function-btn" data-func="ABS(value)">ABS</button>
+                                <button class="function-btn" data-func="CEIL(value)">CEIL</button>
+                                <button class="function-btn" data-func="FLOOR(value)">FLOOR</button>
+                            </div>
+                        </div>
+
+                        <div class="helper-section">
+                            <h4>Templates</h4>
+                            <select id="formulaTemplates" class="select-input">
+                                <option value="">Select a template...</option>
+                                <option value="{price} * (1 + {tax_rate} / 100)">Price with Tax</option>
+                                <option value="{price} - ({price} * {discount} / 100)">Discount (Percent)</option>
+                                <option value="IF({quantity} > 100, {price} * 0.9, {price})">Bulk Discount</option>
+                                <option value="ROUND({price} * {exchange_rate}, 2)">Currency Conversion</option>
+                                <option value="{price} * {quantity}">Total Price</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preview:</label>
+                        <div id="formulaPreview" class="preview-box">Enter a formula to see preview</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="testFormulaBtn" class="btn btn-secondary">Test Formula</button>
+                        <button id="addFormulaBtn" class="btn btn-primary">Add Formula</button>
+                        <button id="clearFormulaBtn" class="btn btn-secondary">Clear</button>
+                    </div>
+
+                    <div id="formulaList" class="item-list">
+                        <h4>Saved Formulas</h4>
+                        <div id="formulasContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Filtering Sub-tab -->
+                <div id="filtering-subtab" class="sub-tab-pane">
+                    <h3>Filter & Sort Data</h3>
+
+                    <div class="filter-builder">
+                        <h4>Filters</h4>
+                        <div id="filtersList" class="filters-container"></div>
+                        
+                        <div class="add-filter-section">
+                            <div class="filter-row">
+                                <select id="filterField" class="select-input">
+                                    <option value="">Select field...</option>
+                                </select>
+                                <select id="filterOperator" class="select-input">
+                                    <option value="equals">Equals</option>
+                                    <option value="notEquals">Not Equals</option>
+                                    <option value="contains">Contains</option>
+                                    <option value="startsWith">Starts With</option>
+                                    <option value="endsWith">Ends With</option>
+                                    <option value="greaterThan">Greater Than</option>
+                                    <option value="lessThan">Less Than</option>
+                                    <option value="isEmpty">Is Empty</option>
+                                    <option value="isNotEmpty">Is Not Empty</option>
+                                </select>
+                                <input type="text" id="filterValue" class="text-input" placeholder="Value">
+                                <button id="addFilterBtn" class="btn btn-primary">Add Filter</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Combine filters with:</label>
+                            <select id="filterLogic" class="select-input">
+                                <option value="AND">AND (all must match)</option>
+                                <option value="OR">OR (any can match)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sort-builder">
+                        <h4>Sort By</h4>
+                        <div id="sortRulesList" class="sort-container"></div>
+                        
+                        <div class="add-sort-section">
+                            <div class="sort-row">
+                                <select id="sortField" class="select-input">
+                                    <option value="">Select field...</option>
+                                </select>
+                                <select id="sortDirection" class="select-input">
+                                    <option value="asc">Ascending</option>
+                                    <option value="desc">Descending</option>
+                                </select>
+                                <button id="addSortBtn" class="btn btn-primary">Add Sort</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-stats">
+                        <p id="filterStatsText">No filters applied</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="applyFiltersBtn" class="btn btn-success">Apply Filters</button>
+                        <button id="saveFilterPresetBtn" class="btn btn-secondary">Save Preset</button>
+                        <button id="loadFilterPresetBtn" class="btn btn-secondary">Load Preset</button>
+                        <button id="clearFiltersBtn" class="btn btn-danger">Clear All</button>
+                    </div>
+                </div>
+
+                <!-- Grouping Sub-tab -->
+                <div id="grouping-subtab" class="sub-tab-pane">
+                    <h3>Group Data</h3>
+
+                    <div class="form-group">
+                        <label>Group By:</label>
+                        <div id="groupLevelsList" class="group-levels-container"></div>
+                        
+                        <div class="add-group-section">
+                            <select id="groupField" class="select-input">
+                                <option value="">Select field...</option>
+                            </select>
+                            <select id="groupDirection" class="select-input">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                            <button id="addGroupBtn" class="btn btn-primary">Add Level</button>
+                        </div>
+                    </div>
+
+                    <div class="group-options">
+                        <h4>Group Options</h4>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="showGroupHeaders" checked>
+                                Show group headers
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="showItemCount" checked>
+                                Show item count in headers
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="pageBreakPerGroup">
+                                Start new page per group
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="groupHeaderStyle">Header Style:</label>
+                            <select id="groupHeaderStyle" class="select-input">
+                                <option value="heading1">Heading 1</option>
+                                <option value="heading2">Heading 2</option>
+                                <option value="heading3">Heading 3</option>
+                                <option value="bold">Bold Text</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="groupSeparator">Separator:</label>
+                            <select id="groupSeparator" class="select-input">
+                                <option value="line">Line</option>
+                                <option value="space">Extra Space</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="applyGroupingBtn" class="btn btn-success">Apply Grouping</button>
+                        <button id="clearGroupingBtn" class="btn btn-danger">Clear Grouping</button>
+                    </div>
+                </div>
+
+                <!-- Cross-References Sub-tab -->
+                <div id="references-subtab" class="sub-tab-pane">
+                    <h3>Cross-References Manager</h3>
+
+                    <div class="form-group">
+                        <label for="refSourceId">Source Product/Record ID:</label>
+                        <input type="text" id="refSourceId" class="text-input" placeholder="Enter source ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="refTargetId">Target Product/Record ID:</label>
+                        <input type="text" id="refTargetId" class="text-input" placeholder="Enter target ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="refType">Reference Type:</label>
+                        <select id="refType" class="select-input">
+                            <option value="related">Related Product</option>
+                            <option value="variant">Product Variant</option>
+                            <option value="see_also">See Also</option>
+                            <option value="replaced_by">Replaced By</option>
+                            <option value="accessory">Accessory</option>
+                            <option value="compatible">Compatible Item</option>
+                            <option value="series">Product Series</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="addReferenceBtn" class="btn btn-primary">Add Reference</button>
+                        <button id="validateReferencesBtn" class="btn btn-secondary">Validate References</button>
+                        <button id="importReferencesBtn" class="btn btn-secondary">Import from Field</button>
+                    </div>
+
+                    <div id="referencesList" class="item-list">
+                        <h4>Current References</h4>
+                        <div id="referencesContainer"></div>
+                    </div>
+
+                    <div class="reference-options">
+                        <h4>Display Options</h4>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="showRefAsList" checked>
+                                Show references as list in catalog
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="includePageNumbers">
+                                Include page numbers in references
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Localization Sub-tab -->
+                <div id="localization-subtab" class="sub-tab-pane">
+                    <h3>Multi-Language Support</h3>
+
+                    <div class="form-group">
+                        <label for="catalogLanguage">Catalog Language:</label>
+                        <select id="catalogLanguage" class="select-input">
+                            <option value="en">English</option>
+                            <option value="fr">Français (French)</option>
+                            <option value="de">Deutsch (German)</option>
+                            <option value="es">Español (Spanish)</option>
+                            <option value="it">Italiano (Italian)</option>
+                            <option value="pt">Português (Portuguese)</option>
+                        </select>
+                    </div>
+
+                    <div class="language-selection">
+                        <h4>Enabled Languages</h4>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="lang_en" value="en" checked disabled> English (en)</label>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="lang_fr" value="fr"> Français (fr)</label>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="lang_de" value="de"> Deutsch (de)</label>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="lang_es" value="es"> Español (es)</label>
+                        </div>
+                    </div>
+
+                    <div id="fieldMappingSection">
+                        <h4>Field Mapping for Selected Language</h4>
+                        <p class="info-text">Map data fields to language-specific columns (e.g., productName → productName_fr)</p>
+                        <div id="langFieldMappings" class="mapping-list"></div>
+                        <button id="autoDetectFieldsBtn" class="btn btn-secondary">Auto-Detect Language Fields</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="useFallback" checked>
+                            Use fallback for missing translations (default to English)
+                        </label>
+                    </div>
+
+                    <div id="translationStatus" class="status-panel">
+                        <h4>Translation Status</h4>
+                        <div id="translationStatsContainer"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="applyLocalizationBtn" class="btn btn-success">Apply Language</button>
+                        <button id="generateAllLanguagesBtn" class="btn btn-primary">Generate All Languages</button>
                     </div>
                 </div>
             </div>
