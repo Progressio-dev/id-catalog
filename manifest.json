@@ -32,9 +32,6 @@
     "network": {
       "domains": "all"
     },
-    "launchProcess": {
-      "schemes": ["https", "mailto", "file"]
-    },
     "clipboard": "readAndWrite"
   }
 }

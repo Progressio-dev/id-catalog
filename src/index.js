@@ -19,7 +19,10 @@ const AppState = {
         enableLogging: true
     },
     currentFile: null,
-    dataType: 'csv'
+    dataType: 'csv',
+    filteredData: null,
+    groupedData: null,
+    currentLanguage: 'en'
 };
 
 // Utility functions
@@ -285,31 +288,39 @@ function updateAdvancedFieldDropdowns(fields) {
     // Update formula fields list
     const formulaFieldsList = document.getElementById('formulaFieldsList');
     if (formulaFieldsList) {
-        formulaFieldsList.innerHTML = fields.map(f => 
-            '<div class="field-item">{' + f + '}</div>'
-        ).join('');
+        formulaFieldsList.innerHTML = '';
+        fields.forEach(f => {
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'field-item';
+            fieldDiv.textContent = '{' + f + '}';
+            formulaFieldsList.appendChild(fieldDiv);
+        });
     }
     
-    // Update filter field dropdown
-    const filterField = document.getElementById('filterField');
-    if (filterField) {
-        filterField.innerHTML = '<option value="">Select field...</option>' + 
-            fields.map(f => '<option value="' + f + '">' + f + '</option>').join('');
+    // Helper to populate select dropdown safely
+    function populateSelect(selectId, fields) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        
+        select.innerHTML = '';
+        
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select field...';
+        select.appendChild(defaultOption);
+        
+        fields.forEach(f => {
+            const option = document.createElement('option');
+            option.value = f;
+            option.textContent = f;
+            select.appendChild(option);
+        });
     }
     
-    // Update sort field dropdown
-    const sortField = document.getElementById('sortField');
-    if (sortField) {
-        sortField.innerHTML = '<option value="">Select field...</option>' + 
-            fields.map(f => '<option value="' + f + '">' + f + '</option>').join('');
-    }
-    
-    // Update group field dropdown
-    const groupField = document.getElementById('groupField');
-    if (groupField) {
-        groupField.innerHTML = '<option value="">Select field...</option>' + 
-            fields.map(f => '<option value="' + f + '">' + f + '</option>').join('');
-    }
+    // Update dropdowns using safe DOM manipulation
+    populateSelect('filterField', fields);
+    populateSelect('sortField', fields);
+    populateSelect('groupField', fields);
 }
 
 /**
@@ -716,7 +727,8 @@ function loadSettings() {
         const saved = localStorage.getItem('catalogBuilderSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            AppState.settings = Object.assign(AppState.settings, settings);
+            // Use spread operator for safe shallow merge
+            AppState.settings = { ...AppState.settings, ...settings };
             
             // Update UI
             if (document.getElementById('defaultImagePath')) {
