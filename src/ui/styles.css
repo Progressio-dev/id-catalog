@@ -962,6 +962,55 @@ input[type="checkbox"] {
     background: #b71c1c;
 }
 
+/* Error Display Panels */
+.error-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f44336;
+    color: white;
+    padding: 20px;
+    z-index: 9999;
+    overflow: auto;
+    font-family: "Adobe Clean", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.error-panel h1,
+.error-panel h2 {
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.error-panel p {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.error-panel .error-detail {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.init-error {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #f44336;
+    color: white;
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;

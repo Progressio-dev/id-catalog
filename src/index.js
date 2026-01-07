@@ -64,13 +64,24 @@ setTimeout(() => {
         
         // Show error to user - append to body instead of replacing
         const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f44336; color: white; padding: 20px; z-index: 9999; overflow: auto;';
-        errorDiv.innerHTML = `
-            <h1>Module Loading Error</h1>
-            <p>ES6 modules failed to load. This may be a compatibility issue with InDesign 2026.</p>
-            <p>Please check the UXP Developer Tool logs.</p>
-            <p>Try reloading the plugin or restarting InDesign.</p>
-        `;
+        errorDiv.className = 'error-panel';
+        
+        const heading = document.createElement('h1');
+        heading.textContent = 'Module Loading Error';
+        errorDiv.appendChild(heading);
+        
+        const p1 = document.createElement('p');
+        p1.textContent = 'ES6 modules failed to load. This may be a compatibility issue with InDesign 2026.';
+        errorDiv.appendChild(p1);
+        
+        const p2 = document.createElement('p');
+        p2.textContent = 'Please check the UXP Developer Tool logs.';
+        errorDiv.appendChild(p2);
+        
+        const p3 = document.createElement('p');
+        p3.textContent = 'Try reloading the plugin or restarting InDesign.';
+        errorDiv.appendChild(p3);
+        
         document.body.appendChild(errorDiv);
         modulesLoaded = false;
     } else {
@@ -89,7 +100,7 @@ async function initialize() {
         // Create a visible error panel if initialization fails
         const errorDisplay = document.createElement('div');
         errorDisplay.id = 'init-error';
-        errorDisplay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; background: #f44336; color: white; padding: 20px; z-index: 9999; display: none;';
+        errorDisplay.className = 'init-error';
         document.body.appendChild(errorDisplay);
         
         logger = new Logger('CatalogBuilder');
@@ -171,12 +182,30 @@ async function initialize() {
         const errorDisplay = document.getElementById('init-error');
         if (errorDisplay) {
             errorDisplay.style.display = 'block';
-            errorDisplay.innerHTML = `
-                <h2>Plugin Initialization Failed</h2>
-                <p><strong>Error:</strong> ${error.message}</p>
-                <p><strong>Stack:</strong> ${error.stack}</p>
-                <p>Check UXP Developer Tool logs for more details.</p>
-            `;
+            
+            // Safely create error display without innerHTML
+            const heading = document.createElement('h2');
+            heading.textContent = 'Plugin Initialization Failed';
+            errorDisplay.appendChild(heading);
+            
+            const errorPara = document.createElement('p');
+            errorPara.innerHTML = '<strong>Error:</strong> ';
+            const errorText = document.createTextNode(error.message);
+            errorPara.appendChild(errorText);
+            errorDisplay.appendChild(errorPara);
+            
+            const stackPara = document.createElement('p');
+            stackPara.innerHTML = '<strong>Stack:</strong> ';
+            errorDisplay.appendChild(stackPara);
+            
+            const stackDetail = document.createElement('div');
+            stackDetail.className = 'error-detail';
+            stackDetail.textContent = error.stack || 'No stack trace available';
+            errorDisplay.appendChild(stackDetail);
+            
+            const logsPara = document.createElement('p');
+            logsPara.textContent = 'Check UXP Developer Tool logs for more details.';
+            errorDisplay.appendChild(logsPara);
         }
         
         // Also show in UI if possible
