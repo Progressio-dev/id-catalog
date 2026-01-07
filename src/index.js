@@ -55,6 +55,15 @@ function showSuccess(message) {
 
 /**
  * CSV Parser - Simple implementation without external dependencies
+ * 
+ * NOTE: This is a basic CSV parser for simple use cases.
+ * Limitations:
+ * - Does not handle quoted fields containing delimiters (e.g., "Company, Inc.")
+ * - Does not handle multi-line fields
+ * - Does not handle escaped quotes
+ * 
+ * For production use with complex CSV files, consider using a robust CSV parsing library.
+ * This implementation is sufficient for well-formed, simple CSV files.
  */
 function parseCSV(content, delimiter = ',', hasHeader = true) {
     console.log('Parsing CSV, length:', content.length);
@@ -235,25 +244,39 @@ function displayDataPreview(data) {
     }
     
     if (previewTable) {
-        // Create preview table
-        let html = '<table><thead><tr>';
+        // Create preview table using safe DOM manipulation
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        
         data.fields.forEach(field => {
-            html += '<th>' + field + '</th>';
+            const th = document.createElement('th');
+            th.textContent = field;
+            headerRow.appendChild(th);
         });
-        html += '</tr></thead><tbody>';
+        
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        const tbody = document.createElement('tbody');
         
         // Show first 10 records
         const previewRecords = data.records.slice(0, 10);
         previewRecords.forEach(record => {
-            html += '<tr>';
+            const row = document.createElement('tr');
             data.fields.forEach(field => {
-                html += '<td>' + (record[field] || '') + '</td>';
+                const td = document.createElement('td');
+                td.textContent = record[field] || '';
+                row.appendChild(td);
             });
-            html += '</tr>';
+            tbody.appendChild(row);
         });
-        html += '</tbody></table>';
         
-        previewTable.innerHTML = html;
+        table.appendChild(tbody);
+        
+        // Clear and append new table
+        previewTable.innerHTML = '';
+        previewTable.appendChild(table);
     }
     
     if (previewPanel) {
@@ -727,7 +750,8 @@ function loadSettings() {
         const saved = localStorage.getItem('catalogBuilderSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            // Use spread operator for safe shallow merge
+            // Use spread operator for safe shallow merge - prevents mutation of original object
+            // and creates a new object with merged properties
             AppState.settings = { ...AppState.settings, ...settings };
             
             // Update UI
