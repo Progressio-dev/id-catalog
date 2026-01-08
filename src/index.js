@@ -464,11 +464,11 @@ class FormulaEngine {
             };
             
             this.formulas.push(formula);
-            logger.info(`Formula added: ${name} = ${expression}`);
+            console.log(`Formula added: ${name} = ${expression}`);
             
             return formula;
         } catch (error) {
-            logger.error(`Failed to add formula: ${error.message}`);
+            console.error(`Failed to add formula: ${error.message}`);
             throw error;
         }
     }
@@ -481,7 +481,7 @@ class FormulaEngine {
         const index = this.formulas.findIndex(f => f.name === name);
         if (index !== -1) {
             this.formulas.splice(index, 1);
-            logger.info(`Formula removed: ${name}`);
+            console.log(`Formula removed: ${name}`);
             return true;
         }
         return false;
@@ -520,10 +520,10 @@ class FormulaEngine {
                 throw new Error('Invalid characters in formula');
             }
 
-            logger.debug(`Formula validated: ${expression}`);
+            console.log(`Formula validated: ${expression}`);
             return true;
         } catch (error) {
-            logger.error(`Formula validation failed: ${error.message}`);
+            console.error(`Formula validation failed: ${error.message}`);
             throw error;
         }
     }
@@ -544,10 +544,10 @@ class FormulaEngine {
             // Evaluate the final expression
             const result = this._evaluateExpression(processedExpression);
             
-            logger.debug(`Evaluated: ${expression} => ${result}`);
+            console.log(`Evaluated: ${expression} => ${result}`);
             return result;
         } catch (error) {
-            logger.error(`Formula evaluation failed: ${error.message}`);
+            console.error(`Formula evaluation failed: ${error.message}`);
             throw new Error(`Formula error: ${error.message}`);
         }
     }
@@ -561,7 +561,7 @@ class FormulaEngine {
         return expression.replace(/{([^}]+)}/g, (match, fieldName) => {
             const value = record[fieldName.trim()];
             if (value === undefined || value === null) {
-                logger.warn(`Field not found: ${fieldName}`);
+                console.warn(`Field not found: ${fieldName}`);
                 return '0';
             }
             // Handle strings vs numbers
@@ -606,7 +606,7 @@ class FormulaEngine {
                     const funcResult = this.functions[funcName](...evaluatedArgs);
                     return funcResult;
                 } catch (error) {
-                    logger.error(`Function ${funcName} failed: ${error.message}`);
+                    console.error(`Function ${funcName} failed: ${error.message}`);
                     throw error;
                 }
             });
@@ -675,7 +675,7 @@ class FormulaEngine {
             const func = new Function('return ' + safeExpression);
             return func();
         } catch (error) {
-            logger.error(`Expression evaluation failed: ${error.message}`);
+            console.error(`Expression evaluation failed: ${error.message}`);
             throw error;
         }
     }
@@ -695,7 +695,7 @@ class FormulaEngine {
                 try {
                     enrichedRecord[formula.name] = this.evaluate(formula.expression, record);
                 } catch (error) {
-                    logger.error(`Failed to apply formula ${formula.name}: ${error.message}`);
+                    console.error(`Failed to apply formula ${formula.name}: ${error.message}`);
                     enrichedRecord[formula.name] = null;
                 }
             });
@@ -723,9 +723,9 @@ class FormulaEngine {
     saveFormulas() {
         try {
             localStorage.setItem('catalogBuilderFormulas', JSON.stringify(this.formulas));
-            logger.info('Formulas saved');
+            console.log('Formulas saved');
         } catch (error) {
-            logger.error('Failed to save formulas:', error);
+            console.error('Failed to save formulas:', error);
             throw error;
         }
     }
@@ -738,10 +738,10 @@ class FormulaEngine {
             const saved = localStorage.getItem('catalogBuilderFormulas');
             if (saved) {
                 this.formulas = JSON.parse(saved);
-                logger.info(`Loaded ${this.formulas.length} formulas`);
+                console.log(`Loaded ${this.formulas.length} formulas`);
             }
         } catch (error) {
-            logger.error('Failed to load formulas:', error);
+            console.error('Failed to load formulas:', error);
         }
     }
 
@@ -763,10 +763,10 @@ class FormulaEngine {
         try {
             if (data.formulas && Array.isArray(data.formulas)) {
                 this.formulas = data.formulas;
-                logger.info(`Imported ${this.formulas.length} formulas`);
+                console.log(`Imported ${this.formulas.length} formulas`);
             }
         } catch (error) {
-            logger.error('Failed to import formulas:', error);
+            console.error('Failed to import formulas:', error);
             throw error;
         }
     }
@@ -815,10 +815,10 @@ class FilterEngine {
         try {
             this.validateFilter(filter);
             this.filters.push(filter);
-            logger.info(`Filter added: ${filter.field} ${filter.operator} ${filter.value}`);
+            console.log(`Filter added: ${filter.field} ${filter.operator} ${filter.value}`);
             return filter;
         } catch (error) {
-            logger.error(`Failed to add filter: ${error.message}`);
+            console.error(`Failed to add filter: ${error.message}`);
             throw error;
         }
     }
@@ -842,7 +842,7 @@ class FilterEngine {
     removeFilter(index) {
         if (index >= 0 && index < this.filters.length) {
             this.filters.splice(index, 1);
-            logger.info(`Filter removed at index ${index}`);
+            console.log(`Filter removed at index ${index}`);
             return true;
         }
         return false;
@@ -853,7 +853,7 @@ class FilterEngine {
      */
     clearFilters() {
         this.filters = [];
-        logger.info('All filters cleared');
+        console.log('All filters cleared');
     }
 
     /**
@@ -866,7 +866,7 @@ class FilterEngine {
             return records;
         }
 
-        logger.info(`Applying ${this.filters.length} filters with ${logic} logic`);
+        console.log(`Applying ${this.filters.length} filters with ${logic} logic`);
 
         const filtered = records.filter(record => {
             if (logic === 'AND') {
@@ -876,7 +876,7 @@ class FilterEngine {
             }
         });
 
-        logger.info(`Filtered ${records.length} records to ${filtered.length} records`);
+        console.log(`Filtered ${records.length} records to ${filtered.length} records`);
         return filtered;
     }
 
@@ -939,12 +939,12 @@ class FilterEngine {
                     const regex = new RegExp(filterValue, 'i');
                     return regex.test(String(value));
                 } catch (error) {
-                    logger.error(`Invalid regex: ${filterValue}`);
+                    console.error(`Invalid regex: ${filterValue}`);
                     return false;
                 }
             
             default:
-                logger.warn(`Unknown operator: ${filter.operator}`);
+                console.warn(`Unknown operator: ${filter.operator}`);
                 return true;
         }
     }
@@ -974,7 +974,7 @@ class FilterEngine {
     addSortRule(field, direction = 'asc', type = 'auto') {
         const rule = { field, direction, type };
         this.sortRules.push(rule);
-        logger.info(`Sort rule added: ${field} ${direction}`);
+        console.log(`Sort rule added: ${field} ${direction}`);
         return rule;
     }
 
@@ -984,7 +984,7 @@ class FilterEngine {
     removeSortRule(index) {
         if (index >= 0 && index < this.sortRules.length) {
             this.sortRules.splice(index, 1);
-            logger.info(`Sort rule removed at index ${index}`);
+            console.log(`Sort rule removed at index ${index}`);
             return true;
         }
         return false;
@@ -995,7 +995,7 @@ class FilterEngine {
      */
     clearSortRules() {
         this.sortRules = [];
-        logger.info('All sort rules cleared');
+        console.log('All sort rules cleared');
     }
 
     /**
@@ -1006,7 +1006,7 @@ class FilterEngine {
             return records;
         }
 
-        logger.info(`Applying ${this.sortRules.length} sort rules`);
+        console.log(`Applying ${this.sortRules.length} sort rules`);
 
         const sorted = [...records].sort((a, b) => {
             for (const rule of this.sortRules) {
@@ -1089,7 +1089,7 @@ class FilterEngine {
 
         this.presets.push(preset);
         this._savePresetsToStorage();
-        logger.info(`Preset saved: ${name}`);
+        console.log(`Preset saved: ${name}`);
         return preset;
     }
 
@@ -1101,7 +1101,7 @@ class FilterEngine {
         if (preset) {
             this.filters = [...preset.filters];
             this.sortRules = [...preset.sortRules];
-            logger.info(`Preset loaded: ${name}`);
+            console.log(`Preset loaded: ${name}`);
             return preset;
         }
         throw new Error(`Preset not found: ${name}`);
@@ -1115,7 +1115,7 @@ class FilterEngine {
         if (index !== -1) {
             this.presets.splice(index, 1);
             this._savePresetsToStorage();
-            logger.info(`Preset deleted: ${name}`);
+            console.log(`Preset deleted: ${name}`);
             return true;
         }
         return false;
@@ -1147,7 +1147,7 @@ class FilterEngine {
         try {
             localStorage.setItem('catalogBuilderFilterPresets', JSON.stringify(this.presets));
         } catch (error) {
-            logger.error('Failed to save presets:', error);
+            console.error('Failed to save presets:', error);
         }
     }
 
@@ -1159,10 +1159,10 @@ class FilterEngine {
             const saved = localStorage.getItem('catalogBuilderFilterPresets');
             if (saved) {
                 this.presets = JSON.parse(saved);
-                logger.info(`Loaded ${this.presets.length} presets`);
+                console.log(`Loaded ${this.presets.length} presets`);
             }
         } catch (error) {
-            logger.error('Failed to load presets:', error);
+            console.error('Failed to load presets:', error);
         }
     }
 
@@ -1187,9 +1187,9 @@ class FilterEngine {
             if (config.filters) this.filters = config.filters;
             if (config.sortRules) this.sortRules = config.sortRules;
             if (config.presets) this.presets = config.presets;
-            logger.info('Configuration imported');
+            console.log('Configuration imported');
         } catch (error) {
-            logger.error('Failed to import configuration:', error);
+            console.error('Failed to import configuration:', error);
             throw error;
         }
     }
@@ -1255,7 +1255,7 @@ class GroupingEngine {
         };
         
         this.groupLevels.push(level);
-        logger.info(`Group level added: ${field} (${sortDirection})`);
+        console.log(`Group level added: ${field} (${sortDirection})`);
         return level;
     }
 
@@ -1269,7 +1269,7 @@ class GroupingEngine {
             this.groupLevels.forEach((level, i) => {
                 level.level = i;
             });
-            logger.info(`Group level removed at index ${index}`);
+            console.log(`Group level removed at index ${index}`);
             return true;
         }
         return false;
@@ -1280,7 +1280,7 @@ class GroupingEngine {
      */
     clearGroupLevels() {
         this.groupLevels = [];
-        logger.info('All group levels cleared');
+        console.log('All group levels cleared');
     }
 
     /**
@@ -1288,7 +1288,7 @@ class GroupingEngine {
      */
     setOptions(options) {
         this.groupOptions = { ...this.groupOptions, ...options };
-        logger.info('Group options updated');
+        console.log('Group options updated');
     }
 
     /**
@@ -1297,11 +1297,11 @@ class GroupingEngine {
      */
     groupRecords(records) {
         if (this.groupLevels.length === 0) {
-            logger.warn('No group levels defined');
+            console.warn('No group levels defined');
             return { groups: [], flatList: records };
         }
 
-        logger.info(`Grouping ${records.length} records by ${this.groupLevels.length} levels`);
+        console.log(`Grouping ${records.length} records by ${this.groupLevels.length} levels`);
 
         // Sort records by group fields first
         const sortedRecords = this._sortByGroupLevels(records);
@@ -1312,7 +1312,7 @@ class GroupingEngine {
         // Create flat list with group markers
         const flatList = this._flattenGroups(groups);
 
-        logger.info(`Created ${this._countGroups(groups)} groups`);
+        console.log(`Created ${this._countGroups(groups)} groups`);
 
         return { groups, flatList };
     }
@@ -1579,9 +1579,9 @@ class GroupingEngine {
         
         try {
             localStorage.setItem('catalogBuilderGrouping', JSON.stringify(config));
-            logger.info('Group configuration saved');
+            console.log('Group configuration saved');
         } catch (error) {
-            logger.error('Failed to save configuration:', error);
+            console.error('Failed to save configuration:', error);
             throw error;
         }
     }
@@ -1596,10 +1596,10 @@ class GroupingEngine {
                 const config = JSON.parse(saved);
                 this.groupLevels = config.groupLevels || [];
                 this.groupOptions = { ...this.groupOptions, ...config.groupOptions };
-                logger.info('Group configuration loaded');
+                console.log('Group configuration loaded');
             }
         } catch (error) {
-            logger.error('Failed to load configuration:', error);
+            console.error('Failed to load configuration:', error);
         }
     }
 
@@ -1622,9 +1622,9 @@ class GroupingEngine {
         try {
             if (config.groupLevels) this.groupLevels = config.groupLevels;
             if (config.groupOptions) this.groupOptions = { ...this.groupOptions, ...config.groupOptions };
-            logger.info('Group configuration imported');
+            console.log('Group configuration imported');
         } catch (error) {
-            logger.error('Failed to import configuration:', error);
+            console.error('Failed to import configuration:', error);
             throw error;
         }
     }
@@ -1724,10 +1724,10 @@ class CrossReferenceEngine {
             }
             this.reverseIndex.get(targetId).push(reference);
 
-            logger.info(`Reference added: ${sourceId} -> ${targetId} (${type})`);
+            console.log(`Reference added: ${sourceId} -> ${targetId} (${type})`);
             return reference;
         } catch (error) {
-            logger.error(`Failed to add reference: ${error.message}`);
+            console.error(`Failed to add reference: ${error.message}`);
             throw error;
         }
     }
@@ -1769,7 +1769,7 @@ class CrossReferenceEngine {
         }
 
         if (removed) {
-            logger.info(`Reference removed: ${sourceId} -> ${targetId}`);
+            console.log(`Reference removed: ${sourceId} -> ${targetId}`);
         }
 
         return removed;
@@ -1854,9 +1854,9 @@ class CrossReferenceEngine {
         });
 
         if (broken.length > 0) {
-            logger.warn(`Found ${broken.length} broken references`);
+            console.warn(`Found ${broken.length} broken references`);
         } else {
-            logger.info('All references are valid');
+            console.log('All references are valid');
         }
 
         return broken;
@@ -1989,7 +1989,7 @@ class CrossReferenceEngine {
             }
         });
 
-        logger.info(`Imported ${count} references from field ${refField}`);
+        console.log(`Imported ${count} references from field ${refField}`);
         return count;
     }
 
@@ -2023,7 +2023,7 @@ class CrossReferenceEngine {
     clearAll() {
         this.references.clear();
         this.reverseIndex.clear();
-        logger.info('All references cleared');
+        console.log('All references cleared');
     }
 
     /**
@@ -2060,9 +2060,9 @@ class CrossReferenceEngine {
             };
             
             localStorage.setItem('catalogBuilderReferences', JSON.stringify(data));
-            logger.info('Cross-references saved');
+            console.log('Cross-references saved');
         } catch (error) {
-            logger.error('Failed to save references:', error);
+            console.error('Failed to save references:', error);
             throw error;
         }
     }
@@ -2077,10 +2077,10 @@ class CrossReferenceEngine {
                 const data = JSON.parse(saved);
                 this.references = new Map(data.references);
                 this.reverseIndex = new Map(data.reverseIndex);
-                logger.info('Cross-references loaded');
+                console.log('Cross-references loaded');
             }
         } catch (error) {
-            logger.error('Failed to load references:', error);
+            console.error('Failed to load references:', error);
         }
     }
 
@@ -2113,9 +2113,9 @@ class CrossReferenceEngine {
                 });
             }
             
-            logger.info('Cross-references imported from JSON');
+            console.log('Cross-references imported from JSON');
         } catch (error) {
-            logger.error('Failed to import references:', error);
+            console.error('Failed to import references:', error);
             throw error;
         }
     }
@@ -2168,11 +2168,11 @@ class LocalizationEngine {
     setLanguage(languageCode) {
         if (this.isLanguageSupported(languageCode)) {
             this.currentLanguage = languageCode;
-            logger.info(`Language set to: ${languageCode}`);
+            console.log(`Language set to: ${languageCode}`);
             return true;
         }
         
-        logger.warn(`Unsupported language: ${languageCode}`);
+        console.warn(`Unsupported language: ${languageCode}`);
         return false;
     }
 
@@ -2188,7 +2188,7 @@ class LocalizationEngine {
      */
     setDefaultLanguage(languageCode) {
         this.defaultLanguage = languageCode;
-        logger.info(`Default language set to: ${languageCode}`);
+        console.log(`Default language set to: ${languageCode}`);
     }
 
     /**
@@ -2197,7 +2197,7 @@ class LocalizationEngine {
     enableLanguage(languageCode) {
         if (this.isLanguageSupported(languageCode) && !this.enabledLanguages.includes(languageCode)) {
             this.enabledLanguages.push(languageCode);
-            logger.info(`Language enabled: ${languageCode}`);
+            console.log(`Language enabled: ${languageCode}`);
             return true;
         }
         return false;
@@ -2210,7 +2210,7 @@ class LocalizationEngine {
         const index = this.enabledLanguages.indexOf(languageCode);
         if (index !== -1 && languageCode !== this.defaultLanguage) {
             this.enabledLanguages.splice(index, 1);
-            logger.info(`Language disabled: ${languageCode}`);
+            console.log(`Language disabled: ${languageCode}`);
             return true;
         }
         return false;
@@ -2246,7 +2246,7 @@ class LocalizationEngine {
      */
     addFieldMapping(baseField, languageFields) {
         this.fieldMappings.set(baseField, languageFields);
-        logger.info(`Field mapping added for: ${baseField}`);
+        console.log(`Field mapping added for: ${baseField}`);
     }
 
     /**
@@ -2262,7 +2262,7 @@ class LocalizationEngine {
         
         // Try fallback
         if (this.useFallback && mapping && mapping[this.defaultLanguage]) {
-            logger.debug(`Using fallback for field: ${baseField}`);
+            console.log(`Using fallback for field: ${baseField}`);
             return mapping[this.defaultLanguage];
         }
         
@@ -2302,7 +2302,7 @@ class LocalizationEngine {
      */
     localizeDataset(records, languageCode = null) {
         const lang = languageCode || this.currentLanguage;
-        logger.info(`Localizing ${records.length} records to ${lang}`);
+        console.log(`Localizing ${records.length} records to ${lang}`);
         
         return records.map(record => this.localizeRecord(record, lang));
     }
@@ -2339,7 +2339,7 @@ class LocalizationEngine {
             this.addFieldMapping(baseField, langFields);
         });
         
-        logger.info(`Auto-detected ${detectedMappings.size} field mappings`);
+        console.log(`Auto-detected ${detectedMappings.size} field mappings`);
         return detectedMappings;
     }
 
@@ -2352,7 +2352,7 @@ class LocalizationEngine {
         try {
             return new Intl.NumberFormat(lang, options).format(number);
         } catch (error) {
-            logger.error(`Number formatting failed: ${error.message}`);
+            console.error(`Number formatting failed: ${error.message}`);
             return String(number);
         }
     }
@@ -2369,7 +2369,7 @@ class LocalizationEngine {
                 currency: currency
             }).format(amount);
         } catch (error) {
-            logger.error(`Currency formatting failed: ${error.message}`);
+            console.error(`Currency formatting failed: ${error.message}`);
             return `${currency} ${amount}`;
         }
     }
@@ -2384,7 +2384,7 @@ class LocalizationEngine {
         try {
             return new Intl.DateTimeFormat(lang, options).format(dateObj);
         } catch (error) {
-            logger.error(`Date formatting failed: ${error.message}`);
+            console.error(`Date formatting failed: ${error.message}`);
             return dateObj.toLocaleDateString();
         }
     }
@@ -2398,7 +2398,7 @@ class LocalizationEngine {
         try {
             return new Intl.Collator(lang, options);
         } catch (error) {
-            logger.error(`Failed to create collator: ${error.message}`);
+            console.error(`Failed to create collator: ${error.message}`);
             return new Intl.Collator('en');
         }
     }
@@ -2449,7 +2449,7 @@ class LocalizationEngine {
      */
     loadUITranslations(translations) {
         this.translations = { ...this.translations, ...translations };
-        logger.info('UI translations loaded');
+        console.log('UI translations loaded');
     }
 
     /**
@@ -2510,9 +2510,9 @@ class LocalizationEngine {
         
         try {
             localStorage.setItem('catalogBuilderLocalization', JSON.stringify(config));
-            logger.info('Localization configuration saved');
+            console.log('Localization configuration saved');
         } catch (error) {
-            logger.error('Failed to save configuration:', error);
+            console.error('Failed to save configuration:', error);
             throw error;
         }
     }
@@ -2530,10 +2530,10 @@ class LocalizationEngine {
                 this.enabledLanguages = config.enabledLanguages || ['en'];
                 this.fieldMappings = new Map(config.fieldMappings || []);
                 this.useFallback = config.useFallback !== undefined ? config.useFallback : true;
-                logger.info('Localization configuration loaded');
+                console.log('Localization configuration loaded');
             }
         } catch (error) {
-            logger.error('Failed to load configuration:', error);
+            console.error('Failed to load configuration:', error);
         }
     }
 
@@ -2562,9 +2562,9 @@ class LocalizationEngine {
             if (config.enabledLanguages) this.enabledLanguages = config.enabledLanguages;
             if (config.fieldMappings) this.fieldMappings = new Map(config.fieldMappings);
             if (config.useFallback !== undefined) this.useFallback = config.useFallback;
-            logger.info('Localization configuration imported');
+            console.log('Localization configuration imported');
         } catch (error) {
-            logger.error('Failed to import configuration:', error);
+            console.error('Failed to import configuration:', error);
             throw error;
         }
     }
@@ -2630,7 +2630,7 @@ class DataImporter {
      */
     async selectFile(type = 'csv') {
         try {
-            logger.info('Opening file picker for type:', type);
+            console.log('Opening file picker for type:', type);
             
             // In UXP, we use the file system access API
             const fs = require('uxp').storage.localFileSystem;
@@ -2642,13 +2642,13 @@ class DataImporter {
             });
             
             if (file) {
-                logger.info('File selected:', file.name);
+                console.log('File selected:', file.name);
                 return file;
             }
             
             return null;
         } catch (error) {
-            logger.error('File selection failed:', error);
+            console.error('File selection failed:', error);
             throw new Error('Failed to select file: ' + error.message);
         }
     }
@@ -2658,7 +2658,7 @@ class DataImporter {
      */
     async importData(file, options = {}) {
         try {
-            logger.info('Importing data from:', file.name);
+            console.log('Importing data from:', file.name);
             
             const type = options.type || this.detectFileType(file.name);
             
@@ -2675,7 +2675,7 @@ class DataImporter {
                     throw new Error('Unsupported file type: ' + type);
             }
         } catch (error) {
-            logger.error('Data import failed:', error);
+            console.error('Data import failed:', error);
             throw error;
         }
     }
@@ -2700,7 +2700,7 @@ class DataImporter {
      */
     async importCSV(file, options = {}) {
         try {
-            logger.info('Importing CSV file');
+            console.log('Importing CSV file');
             
             const delimiter = options.delimiter || ',';
             const hasHeader = options.hasHeader !== false;
@@ -2743,7 +2743,7 @@ class DataImporter {
             // Detect data types
             const fieldTypes = this.detectFieldTypes(records, headers);
             
-            logger.info(`Imported ${records.length} records with ${headers.length} fields`);
+            console.log(`Imported ${records.length} records with ${headers.length} fields`);
             
             return {
                 type: 'csv',
@@ -2759,7 +2759,7 @@ class DataImporter {
                 }
             };
         } catch (error) {
-            logger.error('CSV import failed:', error);
+            console.error('CSV import failed:', error);
             throw new Error('Failed to import CSV: ' + error.message);
         }
     }
@@ -2769,20 +2769,20 @@ class DataImporter {
      */
     async importExcel(file, options = {}) {
         try {
-            logger.info('Importing Excel file');
+            console.log('Importing Excel file');
             
             // Read file as binary
             const arrayBuffer = await file.read({ format: require('uxp').storage.formats.binary });
             
             // Parse using a library (would need to bundle XLSX library)
             // For now, we'll use a simplified approach
-            logger.warn('Excel import requires XLSX library - falling back to CSV-like parsing');
+            console.warn('Excel import requires XLSX library - falling back to CSV-like parsing');
             
             // This is a placeholder - in production, use SheetJS (xlsx) library
             throw new Error('Excel import not fully implemented - please export as CSV');
             
         } catch (error) {
-            logger.error('Excel import failed:', error);
+            console.error('Excel import failed:', error);
             throw error;
         }
     }
@@ -2792,7 +2792,7 @@ class DataImporter {
      */
     async importJSON(file, options = {}) {
         try {
-            logger.info('Importing JSON file');
+            console.log('Importing JSON file');
             
             // Read file content
             const content = await file.read({ format: require('uxp').storage.formats.utf8 });
@@ -2823,7 +2823,7 @@ class DataImporter {
             // Detect data types
             const fieldTypes = this.detectFieldTypes(records, fields);
             
-            logger.info(`Imported ${records.length} records with ${fields.length} fields`);
+            console.log(`Imported ${records.length} records with ${fields.length} fields`);
             
             return {
                 type: 'json',
@@ -2837,7 +2837,7 @@ class DataImporter {
                 }
             };
         } catch (error) {
-            logger.error('JSON import failed:', error);
+            console.error('JSON import failed:', error);
             throw new Error('Failed to import JSON: ' + error.message);
         }
     }
@@ -2847,7 +2847,7 @@ class DataImporter {
      */
     async importXML(file, options = {}) {
         try {
-            logger.info('Importing XML file');
+            console.log('Importing XML file');
             
             // Read file content
             const content = await file.read({ format: require('uxp').storage.formats.utf8 });
@@ -2901,7 +2901,7 @@ class DataImporter {
             // Detect data types
             const fieldTypes = this.detectFieldTypes(records, fields);
             
-            logger.info(`Imported ${records.length} records with ${fields.length} fields`);
+            console.log(`Imported ${records.length} records with ${fields.length} fields`);
             
             return {
                 type: 'xml',
@@ -2915,7 +2915,7 @@ class DataImporter {
                 }
             };
         } catch (error) {
-            logger.error('XML import failed:', error);
+            console.error('XML import failed:', error);
             throw new Error('Failed to import XML: ' + error.message);
         }
     }
@@ -3008,7 +3008,7 @@ class DataMapper {
      */
     async detectFrames() {
         try {
-            logger.info('Detecting frames in document');
+            console.log('Detecting frames in document');
             
             const doc = getActiveDocument();
             if (!doc) {
@@ -3041,10 +3041,10 @@ class DataMapper {
                 });
             }
             
-            logger.info(`Detected ${frames.length} frames`);
+            console.log(`Detected ${frames.length} frames`);
             return frames;
         } catch (error) {
-            logger.error('Frame detection failed:', error);
+            console.error('Frame detection failed:', error);
             throw error;
         }
     }
@@ -3064,7 +3064,7 @@ class DataMapper {
         };
         
         this.mappings.push(mapping);
-        logger.info(`Created mapping: ${field} -> frame ${frameId}`);
+        console.log(`Created mapping: ${field} -> frame ${frameId}`);
         
         return mapping;
     }
@@ -3076,7 +3076,7 @@ class DataMapper {
         const index = this.mappings.findIndex(m => m.id === mappingId);
         if (index !== -1) {
             this.mappings.splice(index, 1);
-            logger.info(`Removed mapping: ${mappingId}`);
+            console.log(`Removed mapping: ${mappingId}`);
             return true;
         }
         return false;
@@ -3094,7 +3094,7 @@ class DataMapper {
      */
     clearMappings() {
         this.mappings = [];
-        logger.info('Cleared all mappings');
+        console.log('Cleared all mappings');
     }
 
     /**
@@ -3102,7 +3102,7 @@ class DataMapper {
      */
     async saveMapping(mappings) {
         try {
-            logger.info('Saving mappings');
+            console.log('Saving mappings');
             
             const fs = require('uxp').storage.localFileSystem;
             const file = await fs.getFileForSaving('mappings.json', {
@@ -3112,13 +3112,13 @@ class DataMapper {
             if (file) {
                 const data = JSON.stringify(mappings, null, 2);
                 await file.write(data, { format: require('uxp').storage.formats.utf8 });
-                logger.info('Mappings saved successfully');
+                console.log('Mappings saved successfully');
                 return true;
             }
             
             return false;
         } catch (error) {
-            logger.error('Failed to save mappings:', error);
+            console.error('Failed to save mappings:', error);
             throw error;
         }
     }
@@ -3128,7 +3128,7 @@ class DataMapper {
      */
     async loadMapping() {
         try {
-            logger.info('Loading mappings');
+            console.log('Loading mappings');
             
             const fs = require('uxp').storage.localFileSystem;
             const file = await fs.getFileForOpening({
@@ -3139,13 +3139,13 @@ class DataMapper {
                 const content = await file.read({ format: require('uxp').storage.formats.utf8 });
                 const mappings = JSON.parse(content);
                 
-                logger.info(`Loaded ${mappings.length} mappings`);
+                console.log(`Loaded ${mappings.length} mappings`);
                 return mappings;
             }
             
             return null;
         } catch (error) {
-            logger.error('Failed to load mappings:', error);
+            console.error('Failed to load mappings:', error);
             throw error;
         }
     }
@@ -3174,14 +3174,14 @@ class DataMapper {
             } else if (mapping.type === 'image') {
                 // Place image
                 if (transformedValue) {
-                    logger.debug(`Placing image: ${transformedValue}`);
+                    console.log(`Placing image: ${transformedValue}`);
                     // Would use frame.place() in actual InDesign
                 }
             }
             
             return true;
         } catch (error) {
-            logger.error('Failed to apply mapping:', error);
+            console.error('Failed to apply mapping:', error);
             throw error;
         }
     }
@@ -3276,7 +3276,7 @@ class TemplateManager {
      */
     async createTemplate(options) {
         try {
-            logger.info('Creating template with options:', options);
+            console.log('Creating template with options:', options);
             
             const template = {
                 id: generateId(),
@@ -3298,11 +3298,11 @@ class TemplateManager {
             }
             
             this.templates.push(template);
-            logger.info('Template created:', template.id);
+            console.log('Template created:', template.id);
             
             return template;
         } catch (error) {
-            logger.error('Failed to create template:', error);
+            console.error('Failed to create template:', error);
             throw error;
         }
     }
@@ -3312,7 +3312,7 @@ class TemplateManager {
      */
     async saveTemplate(template) {
         try {
-            logger.info('Saving template:', template.id);
+            console.log('Saving template:', template.id);
             
             const fs = require('uxp').storage.localFileSystem;
             const file = await fs.getFileForSaving(`${template.name}.json`, {
@@ -3322,13 +3322,13 @@ class TemplateManager {
             if (file) {
                 const data = JSON.stringify(template, null, 2);
                 await file.write(data, { format: require('uxp').storage.formats.utf8 });
-                logger.info('Template saved successfully');
+                console.log('Template saved successfully');
                 return true;
             }
             
             return false;
         } catch (error) {
-            logger.error('Failed to save template:', error);
+            console.error('Failed to save template:', error);
             throw error;
         }
     }
@@ -3338,7 +3338,7 @@ class TemplateManager {
      */
     async loadTemplate() {
         try {
-            logger.info('Loading template');
+            console.log('Loading template');
             
             const fs = require('uxp').storage.localFileSystem;
             const file = await fs.getFileForOpening({
@@ -3350,14 +3350,14 @@ class TemplateManager {
                 const template = JSON.parse(content);
                 
                 this.templates.push(template);
-                logger.info('Template loaded:', template.id);
+                console.log('Template loaded:', template.id);
                 
                 return template;
             }
             
             return null;
         } catch (error) {
-            logger.error('Failed to load template:', error);
+            console.error('Failed to load template:', error);
             throw error;
         }
     }
@@ -3384,7 +3384,7 @@ class TemplateManager {
         if (index !== -1) {
             this.templates.splice(index, 1);
             this.saveSavedTemplates();
-            logger.info('Template deleted:', id);
+            console.log('Template deleted:', id);
             return true;
         }
         return false;
@@ -3398,10 +3398,10 @@ class TemplateManager {
             const saved = localStorage.getItem('catalogBuilderTemplates');
             if (saved) {
                 this.templates = JSON.parse(saved);
-                logger.info(`Loaded ${this.templates.length} saved templates`);
+                console.log(`Loaded ${this.templates.length} saved templates`);
             }
         } catch (error) {
-            logger.error('Failed to load saved templates:', error);
+            console.error('Failed to load saved templates:', error);
         }
     }
 
@@ -3411,9 +3411,9 @@ class TemplateManager {
     async saveSavedTemplates() {
         try {
             localStorage.setItem('catalogBuilderTemplates', JSON.stringify(this.templates));
-            logger.info('Templates saved to storage');
+            console.log('Templates saved to storage');
         } catch (error) {
-            logger.error('Failed to save templates to storage:', error);
+            console.error('Failed to save templates to storage:', error);
         }
     }
 
@@ -3422,7 +3422,7 @@ class TemplateManager {
      */
     async applyTemplate(template, doc) {
         try {
-            logger.info('Applying template:', template.id);
+            console.log('Applying template:', template.id);
             
             if (!doc) {
                 doc = getActiveDocument();
@@ -3434,11 +3434,11 @@ class TemplateManager {
             
             // Apply template settings
             // This would involve creating frames, setting up grids, etc.
-            logger.info('Template applied successfully');
+            console.log('Template applied successfully');
             
             return true;
         } catch (error) {
-            logger.error('Failed to apply template:', error);
+            console.error('Failed to apply template:', error);
             throw error;
         }
     }
@@ -3470,7 +3470,7 @@ class PageGenerator {
      */
     async generate(options) {
         try {
-            logger.info('Starting catalog generation');
+            console.log('Starting catalog generation');
             
             const doc = await ensureDocument();
             const { data, mappings, template, onProgress } = options;
@@ -3511,10 +3511,10 @@ class PageGenerator {
                 await new Promise(resolve => setTimeout(resolve, 10));
             }
             
-            logger.info(`Generated catalog with ${data.records.length} items`);
+            console.log(`Generated catalog with ${data.records.length} items`);
             return true;
         } catch (error) {
-            logger.error('Catalog generation failed:', error);
+            console.error('Catalog generation failed:', error);
             throw error;
         }
     }
@@ -3584,7 +3584,7 @@ class PageGenerator {
             
             return true;
         } catch (error) {
-            logger.error('Failed to place record:', error);
+            console.error('Failed to place record:', error);
             throw error;
         }
     }
@@ -3600,7 +3600,7 @@ class PageGenerator {
             }
             return doc.pages[doc.pages.length - 1];
         } catch (error) {
-            logger.error('Failed to get/create page:', error);
+            console.error('Failed to get/create page:', error);
             throw error;
         }
     }
@@ -3627,7 +3627,7 @@ class PageGenerator {
             
             return frames;
         } catch (error) {
-            logger.error('Failed to create frames:', error);
+            console.error('Failed to create frames:', error);
             throw error;
         }
     }
@@ -3646,7 +3646,7 @@ class PageGenerator {
             
             return true;
         } catch (error) {
-            logger.error('Failed to fill frame:', error);
+            console.error('Failed to fill frame:', error);
             throw error;
         }
     }
@@ -3656,7 +3656,7 @@ class PageGenerator {
      */
     async clearDocument(doc) {
         try {
-            logger.info('Clearing document content');
+            console.log('Clearing document content');
             
             // Remove all pages except the first one
             while (doc.pages.length > 1) {
@@ -3672,10 +3672,10 @@ class PageGenerator {
                 }
             }
             
-            logger.info('Document cleared');
+            console.log('Document cleared');
             return true;
         } catch (error) {
-            logger.error('Failed to clear document:', error);
+            console.error('Failed to clear document:', error);
             throw error;
         }
     }
@@ -3690,7 +3690,7 @@ class PageGenerator {
             }
             return doc.pages.add();
         } catch (error) {
-            logger.error('Failed to add page:', error);
+            console.error('Failed to add page:', error);
             throw error;
         }
     }
@@ -3716,20 +3716,20 @@ class ImageManager {
      */
     async selectFolder() {
         try {
-            logger.info('Opening folder picker');
+            console.log('Opening folder picker');
             
             const fs = require('uxp').storage.localFileSystem;
             const folder = await fs.getFolder();
             
             if (folder) {
-                logger.info('Folder selected:', folder.nativePath);
+                console.log('Folder selected:', folder.nativePath);
                 this.defaultPath = folder.nativePath;
                 return folder;
             }
             
             return null;
         } catch (error) {
-            logger.error('Folder selection failed:', error);
+            console.error('Folder selection failed:', error);
             throw error;
         }
     }
@@ -3762,7 +3762,7 @@ class ImageManager {
             
             return { valid: false, error: 'Unknown error' };
         } catch (error) {
-            logger.error('Image validation failed:', error);
+            console.error('Image validation failed:', error);
             return { valid: false, error: error.message };
         }
     }
@@ -3791,14 +3791,14 @@ class ImageManager {
      */
     async placeImage(frame, imagePath, options = {}) {
         try {
-            logger.info('Placing image:', imagePath);
+            console.log('Placing image:', imagePath);
             
             const resolvedPath = this.resolveImagePath(imagePath);
             const validation = await this.validateImagePath(resolvedPath);
             
             if (!validation.valid) {
                 this.missingImages.push({ path: imagePath, error: validation.error });
-                logger.warn(`Image not found or invalid: ${imagePath}`);
+                console.warn(`Image not found or invalid: ${imagePath}`);
                 return false;
             }
             
@@ -3810,10 +3810,10 @@ class ImageManager {
                 this.applyImageFitting(frame, options.fitting);
             }
             
-            logger.info('Image placed successfully');
+            console.log('Image placed successfully');
             return true;
         } catch (error) {
-            logger.error('Failed to place image:', error);
+            console.error('Failed to place image:', error);
             this.missingImages.push({ path: imagePath, error: error.message });
             return false;
         }
@@ -3827,21 +3827,21 @@ class ImageManager {
             switch (fitting) {
                 case 'fit':
                     // frame.fit(FitOptions.FRAME_TO_CONTENT);
-                    logger.debug('Applied fit to frame');
+                    console.log('Applied fit to frame');
                     break;
                 case 'fill':
                     // frame.fit(FitOptions.FILL_PROPORTIONALLY);
-                    logger.debug('Applied fill to frame');
+                    console.log('Applied fill to frame');
                     break;
                 case 'center':
                     // frame.fit(FitOptions.CENTER_CONTENT);
-                    logger.debug('Applied center to frame');
+                    console.log('Applied center to frame');
                     break;
                 default:
-                    logger.warn('Unknown fitting option:', fitting);
+                    console.warn('Unknown fitting option:', fitting);
             }
         } catch (error) {
-            logger.error('Failed to apply image fitting:', error);
+            console.error('Failed to apply image fitting:', error);
         }
     }
 
@@ -3849,7 +3849,7 @@ class ImageManager {
      * Batch validate images
      */
     async validateImages(imagePaths) {
-        logger.info(`Validating ${imagePaths.length} images`);
+        console.log(`Validating ${imagePaths.length} images`);
         
         const results = [];
         
@@ -3865,7 +3865,7 @@ class ImageManager {
         const validCount = results.filter(r => r.valid).length;
         const invalidCount = results.length - validCount;
         
-        logger.info(`Validation complete: ${validCount} valid, ${invalidCount} invalid`);
+        console.log(`Validation complete: ${validCount} valid, ${invalidCount} invalid`);
         
         return {
             results: results,
@@ -3893,15 +3893,15 @@ class ImageManager {
      */
     async relinkImages(oldPath, newPath) {
         try {
-            logger.info(`Relinking images from ${oldPath} to ${newPath}`);
+            console.log(`Relinking images from ${oldPath} to ${newPath}`);
             
             // In actual implementation, would iterate through all placed images
             // and update their links
             
-            logger.info('Images relinked successfully');
+            console.log('Images relinked successfully');
             return true;
         } catch (error) {
-            logger.error('Failed to relink images:', error);
+            console.error('Failed to relink images:', error);
             throw error;
         }
     }
@@ -3925,7 +3925,7 @@ class ImageManager {
             
             return null;
         } catch (error) {
-            logger.error('Failed to get image info:', error);
+            console.error('Failed to get image info:', error);
             return null;
         }
     }
@@ -3951,7 +3951,7 @@ class UpdateEngine {
      */
     async linkDataSource(data, mappings) {
         try {
-            logger.info('Linking data source to document');
+            console.log('Linking data source to document');
             
             this.linkedData = {
                 data: data,
@@ -3964,12 +3964,12 @@ class UpdateEngine {
             const doc = getActiveDocument();
             if (doc) {
                 // In actual implementation, would store in document's customData
-                logger.info('Data source linked successfully');
+                console.log('Data source linked successfully');
             }
             
             return true;
         } catch (error) {
-            logger.error('Failed to link data source:', error);
+            console.error('Failed to link data source:', error);
             throw error;
         }
     }
@@ -3979,7 +3979,7 @@ class UpdateEngine {
      */
     async update(data, mappings) {
         try {
-            logger.info('Updating catalog with new data');
+            console.log('Updating catalog with new data');
             
             const doc = getActiveDocument();
             if (!doc) {
@@ -3989,7 +3989,7 @@ class UpdateEngine {
             // Compare with existing data to find changes
             const changes = this.detectChanges(this.linkedData?.data, data);
             
-            logger.info(`Found ${changes.length} changes`);
+            console.log(`Found ${changes.length} changes`);
             
             // Apply updates
             for (const change of changes) {
@@ -4010,10 +4010,10 @@ class UpdateEngine {
                 version: this.linkedData?.version || 1
             });
             
-            logger.info('Catalog updated successfully');
+            console.log('Catalog updated successfully');
             return true;
         } catch (error) {
-            logger.error('Failed to update catalog:', error);
+            console.error('Failed to update catalog:', error);
             throw error;
         }
     }
@@ -4060,7 +4060,7 @@ class UpdateEngine {
      */
     async applyUpdate(change, mappings) {
         try {
-            logger.debug(`Applying ${change.type} change at index ${change.index}`);
+            console.log(`Applying ${change.type} change at index ${change.index}`);
             
             // In actual implementation, would locate the corresponding frames
             // and update their content
@@ -4079,7 +4079,7 @@ class UpdateEngine {
             
             return true;
         } catch (error) {
-            logger.error('Failed to apply update:', error);
+            console.error('Failed to apply update:', error);
             throw error;
         }
     }
@@ -4096,15 +4096,15 @@ class UpdateEngine {
      */
     async revertToVersion(version) {
         try {
-            logger.info(`Reverting to version ${version}`);
+            console.log(`Reverting to version ${version}`);
             
             // In actual implementation, would restore previous data state
             // This would require storing version history
             
-            logger.info('Reverted successfully');
+            console.log('Reverted successfully');
             return true;
         } catch (error) {
-            logger.error('Failed to revert:', error);
+            console.error('Failed to revert:', error);
             throw error;
         }
     }
@@ -4120,7 +4120,7 @@ class UpdateEngine {
      * Unlink data source
      */
     unlinkDataSource() {
-        logger.info('Unlinking data source');
+        console.log('Unlinking data source');
         this.linkedData = null;
         return true;
     }
@@ -4148,7 +4148,8 @@ class UpdateEngine {
 
 // ==================== MAIN APPLICATION CODE ====================
 
-// ==================== MAIN APPLICATION CODE ====================
+// Create global logger for the application
+const globalLogger = new Logger('CatalogBuilder');
 
 // Initialize all engine instances
 const formulaEngine = new FormulaEngine();
@@ -4546,6 +4547,7 @@ async function handleDetectFrames() {
 function handleSaveMapping() {
     console.log('Save mapping clicked');
     try {
+        // TODO: Replace prompt() with proper UXP dialog for better UX
         const name = prompt('Enter mapping configuration name:');
         if (!name) return;
         
@@ -4876,8 +4878,7 @@ function handleClearCache() {
 function handleExportLogs() {
     console.log('Export logs clicked');
     try {
-        const logger = new Logger('Export');
-        logger.exportLogs().then(logsText => {
+        globalLogger.exportLogs().then(logsText => {
             // In a full implementation, we would save to file
             // For now, just copy to clipboard or show dialog
             console.log('Logs exported:', logsText);
