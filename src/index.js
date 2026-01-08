@@ -3182,14 +3182,17 @@ class DataMapper {
         try {
             const savedMappings = this.getSavedMappings();
             
+            // Ensure mappingData has the name property
+            const dataToSave = { ...mappingData, name };
+            
             // Check if mapping with this name already exists
             const existingIndex = savedMappings.findIndex(m => m.name === name);
             if (existingIndex !== -1) {
                 // Update existing
-                savedMappings[existingIndex] = mappingData;
+                savedMappings[existingIndex] = dataToSave;
             } else {
                 // Add new
-                savedMappings.push(mappingData);
+                savedMappings.push(dataToSave);
             }
             
             localStorage.setItem('catalogBuilderMappings', JSON.stringify(savedMappings));
@@ -3795,7 +3798,8 @@ class PageGenerator {
             // Convert data array to the format expected by generate()
             const dataObj = Array.isArray(data) ? { records: data } : data;
             
-            // Get initial page count
+            // Get initial page count before generation
+            // Note: ensureDocument() will create a doc if needed, but won't add extra pages
             const doc = await ensureDocument();
             const initialPageCount = doc && doc.pages ? doc.pages.length : 0;
             
@@ -3811,10 +3815,10 @@ class PageGenerator {
                 imageHandling: options.imageHandling || 'fit'
             };
             
-            // Call the existing generate method
+            // Call the existing generate method (will reuse the doc from ensureDocument)
             await this.generate(generateOptions);
             
-            // Get final page count
+            // Get final page count after generation
             const finalPageCount = doc && doc.pages ? doc.pages.length : initialPageCount;
             const pagesCreated = finalPageCount - initialPageCount;
             
