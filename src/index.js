@@ -3788,6 +3788,10 @@ class PageGenerator {
             // Convert data array to the format expected by generate()
             const dataObj = Array.isArray(data) ? { records: data } : data;
             
+            // Get initial page count
+            const doc = await ensureDocument();
+            const initialPageCount = doc && doc.pages ? doc.pages.length : 0;
+            
             // Prepare options for the generate method
             const generateOptions = {
                 data: dataObj,
@@ -3803,12 +3807,16 @@ class PageGenerator {
             // Call the existing generate method
             await this.generate(generateOptions);
             
+            // Get final page count
+            const finalPageCount = doc && doc.pages ? doc.pages.length : initialPageCount;
+            const pagesCreated = Math.max(finalPageCount - initialPageCount, 1);
+            
             // Return result with summary
             const result = {
                 success: true,
-                pagesCreated: 1, // Simplified - would track actual pages created
+                pagesCreated: pagesCreated,
                 recordsProcessed: dataObj.records ? dataObj.records.length : 0,
-                log: [`Processed ${dataObj.records ? dataObj.records.length : 0} records`]
+                log: [`Processed ${dataObj.records ? dataObj.records.length : 0} records`, `Created/updated ${pagesCreated} page(s)`]
             };
             
             console.log('Catalog generation completed successfully');
@@ -4673,7 +4681,7 @@ async function handleSaveMapping() {
     try {
         // Use a simple naming scheme since prompt() is not available in UXP
         // Save with timestamp for uniqueness
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const name = `mapping-${timestamp}`;
         
         const mappingData = {
@@ -4763,7 +4771,7 @@ function handleSaveTemplate() {
         }
         
         // Auto-generate name with timestamp since prompt() is not available in UXP
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const name = `template-${timestamp}`;
         
         AppState.templateManager.saveTemplate(name, AppState.template);
@@ -5225,7 +5233,7 @@ function handleSaveFilterPreset() {
     console.log('Save filter preset clicked');
     try {
         // Auto-generate name with timestamp since prompt() is not available in UXP
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const name = `filter-preset-${timestamp}`;
         const description = 'Auto-saved preset';
         
