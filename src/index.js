@@ -3165,8 +3165,14 @@ class DataMapper {
             const saved = localStorage.getItem('catalogBuilderMappings');
             if (saved) {
                 const mappings = JSON.parse(saved);
-                console.log(`Retrieved ${mappings.length} saved mappings`);
-                return mappings;
+                // Validate that the result is an array
+                if (Array.isArray(mappings)) {
+                    console.log(`Retrieved ${mappings.length} saved mappings`);
+                    return mappings;
+                } else {
+                    console.warn('Saved mappings data is not an array, returning empty array');
+                    return [];
+                }
             }
             return [];
         } catch (error) {
@@ -3819,8 +3825,9 @@ class PageGenerator {
             await this.generate(generateOptions);
             
             // Get final page count after generation
-            const finalPageCount = doc && doc.pages ? doc.pages.length : initialPageCount;
-            const pagesCreated = finalPageCount - initialPageCount;
+            // If doc.pages is unavailable, something went wrong, so return 0 for safety
+            const finalPageCount = doc && doc.pages ? doc.pages.length : 0;
+            const pagesCreated = Math.max(finalPageCount - initialPageCount, 0);
             
             // Return result with summary
             const result = {
