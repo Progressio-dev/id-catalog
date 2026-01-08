@@ -247,6 +247,13 @@ function generateId() {
 }
 
 /**
+ * Generate unique timestamp for naming
+ */
+function generateTimestampName() {
+    return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
+/**
  * Sanitize filename
  */
 function sanitizeFilename(filename) {
@@ -3809,7 +3816,7 @@ class PageGenerator {
             
             // Get final page count
             const finalPageCount = doc && doc.pages ? doc.pages.length : initialPageCount;
-            const pagesCreated = Math.max(finalPageCount - initialPageCount, 1);
+            const pagesCreated = finalPageCount - initialPageCount;
             
             // Return result with summary
             const result = {
@@ -4681,8 +4688,7 @@ async function handleSaveMapping() {
     try {
         // Use a simple naming scheme since prompt() is not available in UXP
         // Save with timestamp for uniqueness
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const name = `mapping-${timestamp}`;
+        const name = `mapping-${generateTimestampName()}`;
         
         const mappingData = {
             name,
@@ -4771,8 +4777,7 @@ function handleSaveTemplate() {
         }
         
         // Auto-generate name with timestamp since prompt() is not available in UXP
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const name = `template-${timestamp}`;
+        const name = `template-${generateTimestampName()}`;
         
         AppState.templateManager.saveTemplate(name, AppState.template);
         updateTemplatesListUI();
@@ -5233,8 +5238,7 @@ function handleSaveFilterPreset() {
     console.log('Save filter preset clicked');
     try {
         // Auto-generate name with timestamp since prompt() is not available in UXP
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const name = `filter-preset-${timestamp}`;
+        const name = `filter-preset-${generateTimestampName()}`;
         const description = 'Auto-saved preset';
         
         AppState.filterEngine.savePreset(name, description);
@@ -5458,16 +5462,17 @@ function handleImportReferences() {
             return;
         }
         
-        // Use first available field since prompt() is not available in UXP
-        // In a full implementation, this would use a proper field selection UI
-        const field = AppState.data.fields && AppState.data.fields.length > 1 
-            ? AppState.data.fields[1] 
-            : AppState.data.fields[0];
-        
-        if (!field) {
-            showError('No fields available for reference import');
+        // Check if fields exist
+        if (!AppState.data.fields || AppState.data.fields.length === 0) {
+            showError('No fields available in imported data');
             return;
         }
+        
+        // Use first available field since prompt() is not available in UXP
+        // In a full implementation, this would use a proper field selection UI
+        const field = AppState.data.fields.length > 1 
+            ? AppState.data.fields[1] 
+            : AppState.data.fields[0];
         
         const idField = AppState.data.fields[0]; // Simplified: use first field as ID
         const refType = 'related';
