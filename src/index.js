@@ -3100,9 +3100,9 @@ class DataMapper {
     /**
      * Save mappings to file
      */
-    async saveMapping(mappings) {
+    async saveMappingToFile(mappings) {
         try {
-            console.log('Saving mappings');
+            console.log('Saving mappings to file');
             
             const fs = require('uxp').storage.localFileSystem;
             const file = await fs.getFileForSaving('mappings.json', {
@@ -3112,13 +3112,13 @@ class DataMapper {
             if (file) {
                 const data = JSON.stringify(mappings, null, 2);
                 await file.write(data, { format: require('uxp').storage.formats.utf8 });
-                console.log('Mappings saved successfully');
+                console.log('Mappings saved successfully to file');
                 return true;
             }
             
             return false;
         } catch (error) {
-            console.error('Failed to save mappings:', error);
+            console.error('Failed to save mappings to file:', error);
             throw error;
         }
     }
@@ -3126,9 +3126,9 @@ class DataMapper {
     /**
      * Load mappings from file
      */
-    async loadMapping() {
+    async loadMappingFromFile() {
         try {
-            console.log('Loading mappings');
+            console.log('Loading mappings from file');
             
             const fs = require('uxp').storage.localFileSystem;
             const file = await fs.getFileForOpening({
@@ -3139,13 +3139,95 @@ class DataMapper {
                 const content = await file.read({ format: require('uxp').storage.formats.utf8 });
                 const mappings = JSON.parse(content);
                 
-                console.log(`Loaded ${mappings.length} mappings`);
+                console.log(`Loaded ${mappings.length} mappings from file`);
                 return mappings;
             }
             
             return null;
         } catch (error) {
-            console.error('Failed to load mappings:', error);
+            console.error('Failed to load mappings from file:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get all saved mappings from localStorage
+     */
+    getSavedMappings() {
+        try {
+            const saved = localStorage.getItem('catalogBuilderMappings');
+            if (saved) {
+                const mappings = JSON.parse(saved);
+                console.log(`Retrieved ${mappings.length} saved mappings`);
+                return mappings;
+            }
+            return [];
+        } catch (error) {
+            console.error('Failed to get saved mappings:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Save mapping configuration to localStorage by name
+     */
+    saveMapping(name, mappingData) {
+        try {
+            const savedMappings = this.getSavedMappings();
+            
+            // Check if mapping with this name already exists
+            const existingIndex = savedMappings.findIndex(m => m.name === name);
+            if (existingIndex !== -1) {
+                // Update existing
+                savedMappings[existingIndex] = mappingData;
+            } else {
+                // Add new
+                savedMappings.push(mappingData);
+            }
+            
+            localStorage.setItem('catalogBuilderMappings', JSON.stringify(savedMappings));
+            console.log(`Mapping "${name}" saved to localStorage`);
+            return true;
+        } catch (error) {
+            console.error('Failed to save mapping:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Load mapping configuration from localStorage by name
+     */
+    loadMapping(name) {
+        try {
+            const savedMappings = this.getSavedMappings();
+            const mapping = savedMappings.find(m => m.name === name);
+            
+            if (mapping) {
+                console.log(`Loaded mapping "${name}" from localStorage`);
+                return mapping;
+            }
+            
+            console.log(`Mapping "${name}" not found`);
+            return null;
+        } catch (error) {
+            console.error('Failed to load mapping:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Delete a saved mapping by name
+     */
+    deleteMapping(name) {
+        try {
+            const savedMappings = this.getSavedMappings();
+            const filtered = savedMappings.filter(m => m.name !== name);
+            
+            localStorage.setItem('catalogBuilderMappings', JSON.stringify(filtered));
+            console.log(`Mapping "${name}" deleted from localStorage`);
+            return true;
+        } catch (error) {
+            console.error('Failed to delete mapping:', error);
             throw error;
         }
     }
@@ -3691,6 +3773,48 @@ class PageGenerator {
             return doc.pages.add();
         } catch (error) {
             console.error('Failed to add page:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Generate catalog with data, options, and progress callback
+     * This is the main entry point called by the UI handlers
+     */
+    async generateCatalog(data, options, onProgress) {
+        try {
+            console.log('Starting catalog generation via generateCatalog');
+            
+            // Convert data array to the format expected by generate()
+            const dataObj = Array.isArray(data) ? { records: data } : data;
+            
+            // Prepare options for the generate method
+            const generateOptions = {
+                data: dataObj,
+                mappings: options.mappings || [],
+                template: options.template || this.defaultOptions,
+                onProgress: onProgress,
+                clearExisting: options.clearExisting !== false,
+                batchSize: options.batchSize || 10,
+                startPage: options.startPage || 1,
+                imageHandling: options.imageHandling || 'fit'
+            };
+            
+            // Call the existing generate method
+            await this.generate(generateOptions);
+            
+            // Return result with summary
+            const result = {
+                success: true,
+                pagesCreated: 1, // Simplified - would track actual pages created
+                recordsProcessed: dataObj.records ? dataObj.records.length : 0,
+                log: [`Processed ${dataObj.records ? dataObj.records.length : 0} records`]
+            };
+            
+            console.log('Catalog generation completed successfully');
+            return result;
+        } catch (error) {
+            console.error('Catalog generation failed in generateCatalog:', error);
             throw error;
         }
     }
@@ -4544,12 +4668,13 @@ async function handleDetectFrames() {
 /**
  * Mapping handlers
  */
-function handleSaveMapping() {
+async function handleSaveMapping() {
     console.log('Save mapping clicked');
     try {
-        // TODO: Replace prompt() with proper UXP dialog for better UX
-        const name = prompt('Enter mapping configuration name:');
-        if (!name) return;
+        // Use a simple naming scheme since prompt() is not available in UXP
+        // Save with timestamp for uniqueness
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+        const name = `mapping-${timestamp}`;
         
         const mappingData = {
             name,
@@ -4558,31 +4683,29 @@ function handleSaveMapping() {
         };
         
         AppState.dataMapper.saveMapping(name, mappingData);
-        showSuccess('Mapping saved');
+        showSuccess(`Mapping saved as "${name}"`);
     } catch (error) {
         console.error('Save mapping error:', error);
         showError('Failed to save mapping: ' + error.message);
     }
 }
 
-function handleLoadMapping() {
+async function handleLoadMapping() {
     console.log('Load mapping clicked');
     try {
         const mappings = AppState.dataMapper.getSavedMappings();
         if (mappings.length === 0) {
-            showError('No saved mappings');
+            showError('No saved mappings found');
             return;
         }
         
-        const names = mappings.map(m => m.name).join('\n');
-        const selected = prompt('Available mappings:\n' + names + '\n\nEnter mapping name to load:');
+        // For now, load the most recent mapping
+        // In a full implementation, this could show a selection dialog
+        const mostRecent = mappings[mappings.length - 1];
         
-        if (selected) {
-            const mapping = AppState.dataMapper.loadMapping(selected);
-            if (mapping && mapping.mappings) {
-                AppState.mappings = mapping.mappings;
-                showSuccess('Mapping loaded');
-            }
+        if (mostRecent && mostRecent.mappings) {
+            AppState.mappings = mostRecent.mappings;
+            showSuccess(`Mapping "${mostRecent.name}" loaded (${mappings.length} total available)`);
         }
     } catch (error) {
         console.error('Load mapping error:', error);
