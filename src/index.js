@@ -4762,12 +4762,13 @@ function handleSaveTemplate() {
             return;
         }
         
-        const name = prompt('Enter template name:');
-        if (!name) return;
+        // Auto-generate name with timestamp since prompt() is not available in UXP
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+        const name = `template-${timestamp}`;
         
         AppState.templateManager.saveTemplate(name, AppState.template);
         updateTemplatesListUI();
-        showSuccess('Template saved');
+        showSuccess(`Template saved as "${name}"`);
     } catch (error) {
         console.error('Save template error:', error);
         showError('Failed to save template: ' + error.message);
@@ -5223,13 +5224,14 @@ function handleClearFilters() {
 function handleSaveFilterPreset() {
     console.log('Save filter preset clicked');
     try {
-        const name = prompt('Enter preset name:');
-        if (!name) return;
+        // Auto-generate name with timestamp since prompt() is not available in UXP
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+        const name = `filter-preset-${timestamp}`;
+        const description = 'Auto-saved preset';
         
-        const description = prompt('Enter description (optional):');
-        AppState.filterEngine.savePreset(name, description || '');
+        AppState.filterEngine.savePreset(name, description);
         
-        showSuccess('Preset saved');
+        showSuccess(`Preset saved as "${name}"`);
     } catch (error) {
         console.error('Save preset error:', error);
         showError('Failed to save preset: ' + error.message);
@@ -5245,15 +5247,14 @@ function handleLoadFilterPreset() {
             return;
         }
         
-        // Show preset selection (simplified)
-        const names = presets.map(p => p.name).join('\n');
-        const selected = prompt('Available presets:\n' + names + '\n\nEnter preset name to load:');
+        // Load the most recent preset since prompt() is not available in UXP
+        const mostRecent = presets[presets.length - 1];
         
-        if (selected) {
-            AppState.filterEngine.loadPreset(selected);
+        if (mostRecent) {
+            AppState.filterEngine.loadPreset(mostRecent.name);
             updateFiltersListUI();
             updateSortRulesListUI();
-            showSuccess('Preset loaded');
+            showSuccess(`Preset "${mostRecent.name}" loaded (${presets.length} total available)`);
         }
     } catch (error) {
         console.error('Load preset error:', error);
@@ -5449,8 +5450,16 @@ function handleImportReferences() {
             return;
         }
         
-        const field = prompt('Enter field name containing reference IDs (comma-separated):');
-        if (!field) return;
+        // Use first available field since prompt() is not available in UXP
+        // In a full implementation, this would use a proper field selection UI
+        const field = AppState.data.fields && AppState.data.fields.length > 1 
+            ? AppState.data.fields[1] 
+            : AppState.data.fields[0];
+        
+        if (!field) {
+            showError('No fields available for reference import');
+            return;
+        }
         
         const idField = AppState.data.fields[0]; // Simplified: use first field as ID
         const refType = 'related';
@@ -5458,7 +5467,7 @@ function handleImportReferences() {
         const imported = AppState.crossRefEngine.importFromField(AppState.data.records, idField, field, refType);
         
         updateReferencesListUI();
-        showSuccess(`Imported ${imported} references`);
+        showSuccess(`Imported ${imported} references from field "${field}"`);
     } catch (error) {
         console.error('Import references error:', error);
         showError('Failed to import references: ' + error.message);
